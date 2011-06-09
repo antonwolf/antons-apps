@@ -31,8 +31,6 @@ import java.util.regex.Pattern;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -94,16 +92,16 @@ public final class WidgetService extends IntentService {
 	private final static String[] CURSOR_PROJECTION = new String[] { "title",
 			"color", "eventLocation", "allDay", "startDay", "endDay", "end",
 			"hasAlarm", "calendar_id", "begin" };
-	private final static int COL_TITLE = 0;
-	private final static int COL_COLOR = 1;
-	private final static int COL_LOCATION = 2;
-	private final static int COL_ALL_DAY = 3;
-	private final static int COL_START_DAY = 4;
-	private final static int COL_END_DAY = 5;
-	private final static int COL_END_MILLIS = 6;
-	private final static int COL_HAS_ALARM = 7;
-	private final static int COL_CALENDAR = 8;
-	private final static int COL_START_MILLIS = 9;
+	public final static int COL_TITLE = 0;
+	public final static int COL_COLOR = 1;
+	public final static int COL_LOCATION = 2;
+	public final static int COL_ALL_DAY = 3;
+	public final static int COL_START_DAY = 4;
+	public final static int COL_END_DAY = 5;
+	public final static int COL_END_MILLIS = 6;
+	public final static int COL_HAS_ALARM = 7;
+	public final static int COL_CALENDAR = 8;
+	public final static int COL_START_MILLIS = 9;
 
 	private final static String COLOR_DOT = "■\t";
 	private final static String COLOR_HIDDEN = "\t";
@@ -126,18 +124,13 @@ public final class WidgetService extends IntentService {
 	protected synchronized void onHandleIntent(final Intent intent) {
 		Log.d(TAG, "Handling " + intent);
 
-		final int widgetId = Integer.parseInt(intent.getData().getHost());
-		final AppWidgetManager manager = AppWidgetManager.getInstance(this);
-		final AppWidgetProviderInfo widgetInfo = manager
-				.getAppWidgetInfo(widgetId);
-
-		if (null == widgetInfo) {
-			Log.d(TAG, "Invalid widget ID!");
+		final UpdateContext uc = UpdateContext.create(this, intent);
+		if (uc == null)
 			return;
-		}
+		
 		computeTimeRanges();
-		final WidgetInfo info = new WidgetInfo(widgetId, this);
-		final int maxLines = Integer.parseInt(info.lines);
+		
+		final int maxLines = Integer.parseInt(uc.info.lines);
 		final List<Event> birthdayEvents = new ArrayList<Event>(maxLines * 2);
 		final List<Event> agendaEvents = new ArrayList<Event>(maxLines);
 
@@ -154,7 +147,7 @@ public final class WidgetService extends IntentService {
 
 				Event event = null;
 				while (event == null && !cursor.isAfterLast())
-					event = readEvent(cursor, info);
+					event = readEvent(cursor, uc.info);
 				if (event == null)
 					break; // no further events
 
@@ -171,22 +164,22 @@ public final class WidgetService extends IntentService {
 
 		final String packageName = getPackageName();
 		final RemoteViews widget = new RemoteViews(getPackageName(),
-				widgetInfo.initialLayout);
+				uc.appWidgetProviderInfo.initialLayout);
 		widget.removeAllViews(R.id.widget);
 		widget.setOnClickPendingIntent(R.id.widget,
-				getOnClickPendingIntent(widgetId));
+				getOnClickPendingIntent(uc.widgetId));
 
-		final boolean calendarColor = info.calendarColor;
+		final boolean calendarColor = uc.info.calendarColor;
 
 		Iterator<Event> bdayIterator = birthdayEvents.iterator();
 		while (bdayIterator.hasNext()) {
 			final RemoteViews view = new RemoteViews(packageName,
 					R.layout.birthdays);
 			view.setTextViewText(R.id.birthday1_text,
-					formatEventText(bdayIterator.next(), calendarColor, info));
+					formatEventText(bdayIterator.next(), calendarColor, uc.info));
 			if (bdayIterator.hasNext())
 				view.setTextViewText(R.id.birthday2_text,
-						formatEventText(bdayIterator.next(), false, info));
+						formatEventText(bdayIterator.next(), false, uc.info));
 			else
 				view.setTextViewText(R.id.birthday2_text, "");
 			widget.addView(R.id.widget, view);
@@ -196,17 +189,17 @@ public final class WidgetService extends IntentService {
 			final RemoteViews view = new RemoteViews(packageName,
 					R.layout.event);
 			view.setTextViewText(R.id.event_text,
-					formatEventText(event, calendarColor, info));
+					formatEventText(event, calendarColor, uc.info));
 			int alarmFlag = event.hasAlarm ? View.VISIBLE : View.GONE;
 			view.setViewVisibility(R.id.event_alarm, alarmFlag);
 			widget.addView(R.id.widget, view);
 		}
 
-		final int opacityIndex = Integer.parseInt(info.opacity) / 20;
+		final int opacityIndex = Integer.parseInt(uc.info.opacity) / 20;
 		final int background = BACKGROUNDS[opacityIndex];
 		widget.setInt(R.id.widget, "setBackgroundResource", background);
 
-		manager.updateAppWidget(widgetId, widget);
+		uc.appWidgetManager.updateAppWidget(uc.widgetId, widget);
 		scheduleNextUpdate(agendaEvents, intent);
 	}
 
