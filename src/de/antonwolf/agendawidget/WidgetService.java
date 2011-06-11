@@ -21,10 +21,6 @@
  */
 package de.antonwolf.agendawidget;
 
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.Iterator;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,18 +31,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.format.DateUtils;
 import android.text.format.Time;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.RelativeSizeSpan;
 import android.util.Log;
-import android.view.View;
-import android.widget.RemoteViews;
 
 public final class WidgetService extends IntentService {
-	private final static class Event {
+	public final static class Event {
 		public boolean allDay = false;
 		public int color;
 		public int endDay;
@@ -76,14 +66,6 @@ public final class WidgetService extends IntentService {
 	private static final String TAG = "AgendaWidget";
 	private static final String THEAD_NAME = "WidgetServiceThead";
 
-	private static long yesterdayStart;
-	private static long todayStart;
-	private static long tomorrowStart;
-	private static long dayAfterTomorrowStart;
-	private static long oneWeekFromNow;
-	private static long yearStart;
-	private static long yearEnd;
-
 	private static Pattern[] birthdayPatterns;
 
 	private final static String CURSOR_FORMAT = "content://com.android.calendar/instances/when/%1$s/%2$s";
@@ -102,19 +84,10 @@ public final class WidgetService extends IntentService {
 	public final static int COL_HAS_ALARM = 7;
 	public final static int COL_CALENDAR = 8;
 	public final static int COL_START_MILLIS = 9;
-
-	private final static String COLOR_DOT = "■\t";
-	private final static String COLOR_HIDDEN = "\t";
-	private final static String SEPARATOR_COMMA = ", ";
-
-	private final static long DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+	
+	private static long todayStart;
 
 	private final static Pattern IS_EMPTY_PATTERN = Pattern.compile("^\\s*$");
-	private final static int[] BACKGROUNDS = new int[] {
-			R.drawable.background_0, R.drawable.background_20,
-			R.drawable.background_40, R.drawable.background_60,
-			R.drawable.background_80, R.drawable.background_100 };
-	private final static int DATETIME_COLOR = 0xb8ffffff;
 
 	public WidgetService() {
 		super(THEAD_NAME);
@@ -127,22 +100,27 @@ public final class WidgetService extends IntentService {
 		final UpdateContext uc = UpdateContext.create(this, intent);
 		if (uc == null)
 			return;
-		
-		computeTimeRanges();
-		
-		final int maxLines = Integer.parseInt(uc.info.lines);
-		final List<Event> birthdayEvents = new ArrayList<Event>(maxLines * 2);
-		final List<Event> agendaEvents = new ArrayList<Event>(maxLines);
+		final ClassicLayout layout = new ClassicLayout(uc, this);
 
 		Cursor cursor = null;
+		final Time now = new Time();
+		now.setToNow();
+		now.second = 0;
+		now.minute = 0;
+		now.hour = 0;
+		todayStart = now.normalize(false);
+		now.monthDay++;
+		long nextUpdate = now.normalize(false);
+
 		try {
-			cursor = getCursor();
+			final long start = todayStart - 1000 * 60 * 60 * 24;
+			final long end = start + SEARCH_DURATION;
+			final String uriString = String.format(CURSOR_FORMAT, start, end);
+			cursor = getContentResolver().query(Uri.parse(uriString),
+					CURSOR_PROJECTION, null, null, CURSOR_SORT);
 
 			while (true) {
-				boolean widgetFull = Math.ceil(birthdayEvents.size() / 2.0)
-						+ agendaEvents.size() >= maxLines;
-				boolean evenBirthdayCount = birthdayEvents.size() % 2 == 0;
-				if (widgetFull && evenBirthdayCount)
+				if (layout.isFull())
 					break; // widget is full
 
 				Event event = null;
@@ -151,65 +129,18 @@ public final class WidgetService extends IntentService {
 				if (event == null)
 					break; // no further events
 
-				if (event.isBirthday) {
-					if (!birthdayEvents.contains(event))
-						birthdayEvents.add(event);
-				} else if (!widgetFull)
-					agendaEvents.add(event);
+				layout.addEvent(event);
+				if (!event.allDay && event.endMillis < nextUpdate)
+					nextUpdate = event.endMillis;
 			}
 		} finally {
 			if (cursor != null)
 				cursor.close();
 		}
 
-		final String packageName = getPackageName();
-		final RemoteViews widget = new RemoteViews(getPackageName(),
-				uc.appWidgetProviderInfo.initialLayout);
-		widget.removeAllViews(R.id.widget);
-		widget.setOnClickPendingIntent(R.id.widget,
-				getOnClickPendingIntent(uc.widgetId));
+		uc.appWidgetManager.updateAppWidget(uc.widgetId, layout.render());
 
-		final boolean calendarColor = uc.info.calendarColor;
-
-		Iterator<Event> bdayIterator = birthdayEvents.iterator();
-		while (bdayIterator.hasNext()) {
-			final RemoteViews view = new RemoteViews(packageName,
-					R.layout.birthdays);
-			view.setTextViewText(R.id.birthday1_text,
-					formatEventText(bdayIterator.next(), calendarColor, uc.info));
-			if (bdayIterator.hasNext())
-				view.setTextViewText(R.id.birthday2_text,
-						formatEventText(bdayIterator.next(), false, uc.info));
-			else
-				view.setTextViewText(R.id.birthday2_text, "");
-			widget.addView(R.id.widget, view);
-		}
-
-		for (Event event : agendaEvents) {
-			final RemoteViews view = new RemoteViews(packageName,
-					R.layout.event);
-			view.setTextViewText(R.id.event_text,
-					formatEventText(event, calendarColor, uc.info));
-			int alarmFlag = event.hasAlarm ? View.VISIBLE : View.GONE;
-			view.setViewVisibility(R.id.event_alarm, alarmFlag);
-			widget.addView(R.id.widget, view);
-		}
-
-		final int opacityIndex = Integer.parseInt(uc.info.opacity) / 20;
-		final int background = BACKGROUNDS[opacityIndex];
-		widget.setInt(R.id.widget, "setBackgroundResource", background);
-
-		uc.appWidgetManager.updateAppWidget(uc.widgetId, widget);
-		scheduleNextUpdate(agendaEvents, intent);
-	}
-
-	private void scheduleNextUpdate(final List<Event> search,
-			final Intent intent) {
-		long nextUpdate = tomorrowStart;
-		for (Event event : search)
-			if (!event.allDay && event.endMillis < nextUpdate)
-				nextUpdate = event.endMillis;
-
+		// schedule next update
 		PendingIntent pending = PendingIntent.getService(this, 0, intent, 0);
 		AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 		alarmManager.cancel(pending);
@@ -280,37 +211,6 @@ public final class WidgetService extends IntentService {
 		return event;
 	}
 
-	private PendingIntent getOnClickPendingIntent(final int widgetId) {
-		final Intent pickAction = new Intent("pick", Uri.parse("widget://"
-				+ widgetId), this, PickActionActivity.class);
-		pickAction.putExtra(PickActionActivity.EXTRA_WIDGET_ID, widgetId);
-		return PendingIntent.getActivity(this, 0, pickAction, 0);
-	}
-
-	private Cursor getCursor() {
-		final long start = todayStart - 1000 * 60 * 60 * 24;
-		final long end = start + SEARCH_DURATION;
-		final String uriString = String.format(CURSOR_FORMAT, start, end);
-		return getContentResolver().query(Uri.parse(uriString),
-				CURSOR_PROJECTION, null, null, CURSOR_SORT);
-	}
-
-	private void computeTimeRanges() {
-		final Time now = new Time();
-		now.setToNow();
-		final int julianDay = Time.getJulianDay(System.currentTimeMillis(),
-				now.gmtoff);
-
-		yearStart = now.setJulianDay(julianDay - now.yearDay);
-		now.year++;
-		yearEnd = now.toMillis(false);
-		yesterdayStart = now.setJulianDay(julianDay - 1);
-		todayStart = now.setJulianDay(julianDay);
-		tomorrowStart = now.setJulianDay(julianDay + 1);
-		dayAfterTomorrowStart = now.setJulianDay(julianDay + 2);
-		oneWeekFromNow = now.setJulianDay(julianDay + 8);
-	}
-
 	private synchronized Pattern[] getBirthdayPatterns() {
 		if (birthdayPatterns == null) {
 			String[] strings = getResources().getStringArray(
@@ -321,146 +221,5 @@ public final class WidgetService extends IntentService {
 			}
 		}
 		return birthdayPatterns;
-	}
-
-	private CharSequence formatEventText(final Event event,
-			final boolean showColor, final WidgetInfo info) {
-		if (event == null)
-			return "";
-
-		final SpannableStringBuilder builder = new SpannableStringBuilder();
-
-		if (showColor) {
-			if (event.isBirthday)
-				builder.append(COLOR_HIDDEN);
-			else {
-				builder.append(COLOR_DOT);
-				builder.setSpan(new ForegroundColorSpan(event.color), 0, 1,
-						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			}
-		}
-
-		final int timeStartPos = builder.length();
-		formatTime(builder, event, info);
-		builder.append(' ');
-		final int timeEndPos = builder.length();
-		builder.setSpan(new ForegroundColorSpan(DATETIME_COLOR), timeStartPos,
-				timeEndPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-		builder.append(event.title);
-		final int titleEndPos = builder.length();
-		builder.setSpan(new ForegroundColorSpan(0xffffffff), timeEndPos,
-				titleEndPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-		if (event.location != null) {
-			builder.append(SEPARATOR_COMMA);
-			builder.append(event.location);
-			builder.setSpan(new ForegroundColorSpan(DATETIME_COLOR),
-					titleEndPos, builder.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		}
-
-		final float size = Integer.parseInt(info.size) / 100f;
-		builder.setSpan(new RelativeSizeSpan(size), 0, builder.length(), 0);
-
-		return builder;
-	}
-
-	private void formatTime(final SpannableStringBuilder builder,
-			final Event event, final WidgetInfo info) {
-		final Formatter formatter = new Formatter(builder);
-
-		final boolean isStartToday = (todayStart <= event.startMillis && event.startMillis <= tomorrowStart);
-		final boolean isEndToday = (todayStart <= event.endMillis && event.endMillis <= tomorrowStart);
-		final boolean showStartDay = !isStartToday || !isEndToday
-				|| event.allDay;
-
-		// all-Day events
-		if (event.allDay) {
-			if (showStartDay)
-				appendDay(formatter, builder, event.startMillis,
-						event.startTime, info);
-
-			if (event.startDay != event.endDay) {
-				builder.append('-');
-				appendDay(formatter, builder, event.endMillis, event.endTime,
-						info);
-			}
-			return;
-		}
-
-		// events with no duration
-		if (!info.endTime || event.startMillis == event.endMillis) {
-			if (showStartDay) {
-				appendDay(formatter, builder, event.startMillis,
-						event.startTime, info);
-				builder.append(' ');
-			}
-			appendHour(formatter, builder, event.startMillis, info);
-			return;
-		}
-
-		// events with duration
-		if (showStartDay) {
-			appendDay(formatter, builder, event.startMillis, event.startTime,
-					info);
-			builder.append(' ');
-		}
-		appendHour(formatter, builder, event.startMillis, info);
-		builder.append('-');
-
-		if (Math.abs(event.endMillis - event.startMillis) > DAY_IN_MILLIS) {
-			appendDay(formatter, builder, event.endMillis, event.endTime, info);
-			builder.append(' ');
-		}
-		appendHour(formatter, builder, event.endMillis, info);
-	}
-
-	private void appendHour(final Formatter formatter,
-			final SpannableStringBuilder builder, final long time,
-			WidgetInfo info) {
-		if (info.twentyfourHours)
-			formatter.format("%1$tk:%1$tM", time);
-		else {
-			formatter.format("%1$tl:%1$tM", time);
-			int start = builder.length();
-			formatter.format("%1$tp", time);
-			int end = builder.length();
-			builder.setSpan(new RelativeSizeSpan(0.7f), start, end, 0);
-		}
-	}
-
-	private void appendDay(final Formatter formatter,
-			final SpannableStringBuilder builder, final long time,
-			final Time day, final WidgetInfo info) {
-		final boolean tomorrowYesterday = info.tomorrowYesterday;
-		final long specialStart = tomorrowYesterday ? yesterdayStart
-				: todayStart;
-		final long specialEnd = tomorrowYesterday ? dayAfterTomorrowStart
-				: tomorrowStart;
-		final boolean weekday = info.weekday;
-		final long weekEnd = weekday ? oneWeekFromNow : tomorrowStart;
-
-		if (specialStart <= time && time < specialEnd) {
-			final int from = builder.length();
-			if (time < todayStart)
-				builder.append(getResources().getString(
-						R.string.format_yesterday));
-			else if (time < tomorrowStart)
-				builder.append(getResources().getString(R.string.format_today));
-			else
-				builder.append(getResources().getString(
-						R.string.format_tomorrow));
-
-			final RelativeSizeSpan smaller = new RelativeSizeSpan(0.7f);
-			builder.setSpan(smaller, from, builder.length(), 0);
-		} else if (todayStart <= time && time < weekEnd) // this week?
-			builder.append(getResources().getStringArray(
-					R.array.format_day_of_week)[day.weekDay]);
-		else if (yearStart <= time && time < yearEnd) // this year?
-			formatter.format(info.dateFormat.shortFormat, time);
-		else
-			// not this year
-			formatter.format(info.dateFormat.longFormat, time);
 	}
 }
