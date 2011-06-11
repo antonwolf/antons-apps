@@ -47,19 +47,26 @@ public final class ClassicLayout {
 	private final UpdateContext updateContext;
 	private boolean widgetFull = false;
 	private final String packageName;
-	private final Context context;
+
+	private final PendingIntent onClick;
+
 	private final static int[] BACKGROUNDS = new int[] {
 			R.drawable.background_0, R.drawable.background_20,
 			R.drawable.background_40, R.drawable.background_60,
 			R.drawable.background_80, R.drawable.background_100 };
 
-	private long yesterdayStart;
-	private long todayStart;
-	private long tomorrowStart;
-	private long dayAfterTomorrowStart;
-	private long oneWeekFromNow;
-	private long yearStart;
-	private long yearEnd;
+	private final long yesterdayStart;
+	private final long todayStart;
+	private final long tomorrowStart;
+	private final long dayAfterTomorrowStart;
+	private final long oneWeekFromNow;
+	private final long yearStart;
+	private final long yearEnd;
+
+	private final String formatYesterday;
+	private final String formatToday;
+	private final String formatTomorrow;
+	private final String[] formatWeekdays;
 
 	private final static String COLOR_DOT = "■\t";
 	private final static String COLOR_HIDDEN = "\t";
@@ -68,15 +75,38 @@ public final class ClassicLayout {
 	private final static long DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
 	private final static int DATETIME_COLOR = 0xb8ffffff;
 
-	public ClassicLayout(UpdateContext uc, Context context) {
+	public ClassicLayout(UpdateContext uc, Context c) {
 		updateContext = uc;
 		maxLines = Integer.parseInt(uc.info.lines);
 		birthdayEvents = new ArrayList<Event>(maxLines * 2);
 		agendaEvents = new ArrayList<Event>(maxLines);
-		packageName = context.getPackageName();
-		this.context = context;
+		packageName = c.getPackageName();
 
-		computeTimeRanges();
+		final Intent pickAction = new Intent("pick", Uri.parse("widget://"
+				+ uc.widgetId), c, PickActionActivity.class);
+		pickAction.putExtra(PickActionActivity.EXTRA_WIDGET_ID, uc.widgetId);
+		onClick = PendingIntent.getActivity(c, 0, pickAction, 0);
+
+		formatYesterday = c.getResources().getString(R.string.format_yesterday);
+		formatTomorrow = c.getResources().getString(R.string.format_tomorrow);
+		formatToday = c.getResources().getString(R.string.format_today);
+		formatWeekdays = c.getResources().getStringArray(
+				R.array.format_day_of_week);
+
+		// compute time ranges
+		final Time now = new Time();
+		now.setToNow();
+		final int julianDay = Time.getJulianDay(System.currentTimeMillis(),
+				now.gmtoff);
+
+		yearStart = now.setJulianDay(julianDay - now.yearDay);
+		now.year++;
+		yearEnd = now.toMillis(false);
+		yesterdayStart = now.setJulianDay(julianDay - 1);
+		todayStart = now.setJulianDay(julianDay);
+		tomorrowStart = now.setJulianDay(julianDay + 1);
+		dayAfterTomorrowStart = now.setJulianDay(julianDay + 2);
+		oneWeekFromNow = now.setJulianDay(julianDay + 8);
 	}
 
 	public void addEvent(Event e) {
@@ -97,8 +127,7 @@ public final class ClassicLayout {
 	public RemoteViews render() {
 		RemoteViews widget = new RemoteViews(packageName, R.layout.widget);
 		widget.removeAllViews(R.id.widget);
-		widget.setOnClickPendingIntent(R.id.widget,
-				getOnClickPendingIntent(updateContext.widgetId));
+		widget.setOnClickPendingIntent(R.id.widget, onClick);
 
 		final boolean calendarColor = updateContext.info.calendarColor;
 
@@ -135,13 +164,6 @@ public final class ClassicLayout {
 		widget.setInt(R.id.widget, "setBackgroundResource", background);
 
 		return widget;
-	}
-
-	private PendingIntent getOnClickPendingIntent(final int widgetId) {
-		final Intent pickAction = new Intent("pick", Uri.parse("widget://"
-				+ widgetId), context, PickActionActivity.class);
-		pickAction.putExtra(PickActionActivity.EXTRA_WIDGET_ID, widgetId);
-		return PendingIntent.getActivity(context, 0, pickAction, 0);
 	}
 
 	private CharSequence formatEventText(final Event event,
@@ -265,40 +287,20 @@ public final class ClassicLayout {
 		if (specialStart <= time && time < specialEnd) {
 			final int from = builder.length();
 			if (time < todayStart)
-				builder.append(context.getResources().getString(
-						R.string.format_yesterday));
+				builder.append(formatYesterday);
 			else if (time < tomorrowStart)
-				builder.append(context.getResources().getString(
-						R.string.format_today));
+				builder.append(formatToday);
 			else
-				builder.append(context.getResources().getString(
-						R.string.format_tomorrow));
+				builder.append(formatTomorrow);
 
 			final RelativeSizeSpan smaller = new RelativeSizeSpan(0.7f);
 			builder.setSpan(smaller, from, builder.length(), 0);
 		} else if (todayStart <= time && time < weekEnd) // this week?
-			builder.append(context.getResources().getStringArray(
-					R.array.format_day_of_week)[day.weekDay]);
+			builder.append(formatWeekdays[day.weekDay]);
 		else if (yearStart <= time && time < yearEnd) // this year?
 			formatter.format(info.dateFormat.shortFormat, time);
 		else
 			// not this year
 			formatter.format(info.dateFormat.longFormat, time);
-	}
-
-	private void computeTimeRanges() {
-		final Time now = new Time();
-		now.setToNow();
-		final int julianDay = Time.getJulianDay(System.currentTimeMillis(),
-				now.gmtoff);
-
-		yearStart = now.setJulianDay(julianDay - now.yearDay);
-		now.year++;
-		yearEnd = now.toMillis(false);
-		yesterdayStart = now.setJulianDay(julianDay - 1);
-		todayStart = now.setJulianDay(julianDay);
-		tomorrowStart = now.setJulianDay(julianDay + 1);
-		dayAfterTomorrowStart = now.setJulianDay(julianDay + 2);
-		oneWeekFromNow = now.setJulianDay(julianDay + 8);
 	}
 }
