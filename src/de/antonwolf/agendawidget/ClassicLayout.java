@@ -125,7 +125,7 @@ public final class ClassicLayout {
 	}
 
 	public RemoteViews render() {
-		RemoteViews widget = new RemoteViews(packageName, R.layout.widget);
+		RemoteViews widget = new RemoteViews(packageName, R.layout.widget_classic);
 		widget.removeAllViews(R.id.widget);
 		widget.setOnClickPendingIntent(R.id.widget, onClick);
 
