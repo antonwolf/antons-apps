@@ -100,7 +100,7 @@ public final class WidgetService extends IntentService {
 		final UpdateContext uc = UpdateContext.create(this, intent);
 		if (uc == null)
 			return;
-		final ClassicLayout layout = new ClassicLayout(uc, this);
+		final ClassicStyle layout = new ClassicStyle(uc, this);
 
 		Cursor cursor = null;
 		final Time now = new Time();

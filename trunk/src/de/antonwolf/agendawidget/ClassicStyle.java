@@ -40,7 +40,7 @@ import android.widget.RemoteViews;
 
 import de.antonwolf.agendawidget.WidgetService.Event;
 
-public final class ClassicLayout {
+public final class ClassicStyle {
 	private final int maxLines;
 	private final List<Event> birthdayEvents;
 	private final List<Event> agendaEvents;
@@ -75,7 +75,7 @@ public final class ClassicLayout {
 	private final static long DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
 	private final static int DATETIME_COLOR = 0xb8ffffff;
 
-	public ClassicLayout(UpdateContext uc, Context c) {
+	public ClassicStyle(UpdateContext uc, Context c) {
 		updateContext = uc;
 		maxLines = Integer.parseInt(uc.info.lines);
 		birthdayEvents = new ArrayList<Event>(maxLines * 2);
