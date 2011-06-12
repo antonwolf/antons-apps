@@ -20,9 +20,12 @@
  * THE SOFTWARE.
  */
 
-package de.antonwolf.agendawidget;
+package de.antonwolf.agendawidget.widgets;
 
 import java.util.Arrays;
+
+import de.antonwolf.agendawidget.WidgetInfo;
+import de.antonwolf.agendawidget.WidgetService;
 
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
