@@ -20,7 +20,8 @@
  * THE SOFTWARE.
  */
 
-package de.antonwolf.agendawidget;
+package de.antonwolf.agendawidget.widgets;
 
-public final class Widget4x2 extends WidgetBase {
+
+public final class Widget2x1 extends WidgetBase {
 }

@@ -37,7 +37,7 @@ import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-final class WidgetInfo {
+public final class WidgetInfo {
 	public final static class CalendarPreferences {
 		public final int calendarId;
 		public final int color;
