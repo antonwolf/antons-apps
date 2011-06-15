@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -36,33 +38,6 @@ import android.text.format.Time;
 import android.util.Log;
 
 public final class WidgetService extends IntentService {
-	public final static class Event {
-		public boolean allDay = false;
-		public int color;
-		public int endDay;
-		public long endMillis;
-		public Time endTime;
-		public boolean hasAlarm;
-		public boolean isBirthday = false;
-		public String location;
-		public long startMillis;
-		public Time startTime;
-		public int startDay;
-		public String title;
-
-		@Override
-		public boolean equals(Object o) {
-			if (!(o instanceof Event))
-				return false;
-
-			final Event other = (Event) o;
-
-			return isBirthday && other.isBirthday
-					&& other.startDay == this.startDay
-					&& other.title.equals(this.title);
-		}
-	}
-
 	private static final String TAG = "AgendaWidget";
 	private static final String THEAD_NAME = "WidgetServiceThead";
 
@@ -84,7 +59,7 @@ public final class WidgetService extends IntentService {
 	public final static int COL_HAS_ALARM = 7;
 	public final static int COL_CALENDAR = 8;
 	public final static int COL_START_MILLIS = 9;
-	
+
 	private static long todayStart;
 
 	private final static Pattern IS_EMPTY_PATTERN = Pattern.compile("^\\s*$");
@@ -97,10 +72,18 @@ public final class WidgetService extends IntentService {
 	protected synchronized void onHandleIntent(final Intent intent) {
 		Log.d(TAG, "Handling " + intent);
 
-		final UpdateContext uc = UpdateContext.create(this, intent);
-		if (uc == null)
+		final AppWidgetManager appWidgetManager = AppWidgetManager
+				.getInstance(this);
+		final int widgetId = Integer.parseInt(intent.getData().getHost());
+		final AppWidgetProviderInfo appWidgetProviderInfo = appWidgetManager
+				.getAppWidgetInfo(widgetId);
+		if (null == appWidgetProviderInfo) {
+			Log.d(TAG, "Invalid widget ID!");
 			return;
-		final ClassicStyle layout = new ClassicStyle(uc, this);
+		}
+		final WidgetInfo info = new WidgetInfo(widgetId, this);
+
+		final Style style = new ClassicStyle(info, widgetId, this);
 
 		Cursor cursor = null;
 		final Time now = new Time();
@@ -120,16 +103,16 @@ public final class WidgetService extends IntentService {
 					CURSOR_PROJECTION, null, null, CURSOR_SORT);
 
 			while (true) {
-				if (layout.isFull())
+				if (style.isFull())
 					break; // widget is full
 
 				Event event = null;
 				while (event == null && !cursor.isAfterLast())
-					event = readEvent(cursor, uc.info);
+					event = readEvent(cursor, info);
 				if (event == null)
 					break; // no further events
 
-				layout.addEvent(event);
+				style.addEvent(event);
 				if (!event.allDay && event.endMillis < nextUpdate)
 					nextUpdate = event.endMillis;
 			}
@@ -138,7 +121,7 @@ public final class WidgetService extends IntentService {
 				cursor.close();
 		}
 
-		uc.appWidgetManager.updateAppWidget(uc.widgetId, layout.render());
+		appWidgetManager.updateAppWidget(widgetId, style.render());
 
 		// schedule next update
 		PendingIntent pending = PendingIntent.getService(this, 0, intent, 0);
