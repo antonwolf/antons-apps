@@ -21,6 +21,7 @@
  */
 package de.antonwolf.agendawidget;
 
+import java.util.Formatter;
 import java.util.Iterator;
 
 import android.content.Context;
@@ -49,13 +50,14 @@ public final class TwoLinesStyle extends Style {
 		while (bdayIterator.hasNext()) {
 			final RemoteViews view = new RemoteViews(packageName,
 					R.layout.birthdays_two_lines);
-			view.setTextViewText(R.id.first_text,
-					formatEventText(bdayIterator.next(), false, info));
+			formatBirthday(bdayIterator.next(), view, R.id.first_time,
+					R.id.first_text, info);
 			if (bdayIterator.hasNext())
-				view.setTextViewText(R.id.second_text,
-						formatEventText(bdayIterator.next(), false, info));
+				formatBirthday(bdayIterator.next(), view, R.id.second_time,
+						R.id.second_text, info);
 			else
-				view.setTextViewText(R.id.second_text, "");
+				formatBirthday(null, view, R.id.second_time, R.id.second_text,
+						info);
 			widget.addView(R.id.widget, view);
 		}
 
@@ -87,7 +89,7 @@ public final class TwoLinesStyle extends Style {
 
 			int alarmFlag = event.hasAlarm ? View.VISIBLE : View.GONE;
 			view.setViewVisibility(R.id.alarm, alarmFlag);
-			//calendarColor`!!
+			// calendarColor`!!
 			Bitmap a = Bitmap.createBitmap(new int[] { event.color }, 1, 1,
 					Config.ARGB_8888);
 			view.setImageViewBitmap(R.id.color, a);
@@ -101,4 +103,18 @@ public final class TwoLinesStyle extends Style {
 		return widget;
 	}
 
+	private void formatBirthday(Event event, RemoteViews view, int idTime,
+			int idText, WidgetInfo info) {
+		if (event == null) {
+			view.setTextViewText(idTime, "");
+			view.setTextViewText(idText, "");
+			return;
+		}
+		final SpannableStringBuilder timeBuilder = new SpannableStringBuilder();
+		final Formatter timeFormatter = new Formatter();
+		appendDay(timeFormatter, timeBuilder, event.startMillis,
+				event.startTime, info);
+		view.setTextViewText(idTime, timeBuilder);
+		view.setTextViewText(idText, event.title);
+	}
 }
