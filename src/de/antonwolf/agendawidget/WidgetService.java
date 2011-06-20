@@ -83,7 +83,7 @@ public final class WidgetService extends IntentService {
 		}
 		final WidgetInfo info = new WidgetInfo(widgetId, this);
 
-		final Style style = new ClassicStyle(info, widgetId, this);
+		final Style style = new TwoLinesStyle(info, widgetId, this);
 
 		Cursor cursor = null;
 		final Time now = new Time();

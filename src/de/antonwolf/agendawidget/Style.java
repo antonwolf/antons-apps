@@ -217,7 +217,7 @@ public abstract class Style {
 		}
 	}
 
-	private void formatTime(final SpannableStringBuilder builder,
+	protected void formatTime(final SpannableStringBuilder builder,
 			final Event event, final WidgetInfo info) {
 		final Formatter formatter = new Formatter(builder);
 
