@@ -8,6 +8,11 @@
 		<item name="android:shadowColor">#f000</item>
 		<item name="android:shadowRadius">1.5</item>
 		<item name="android:textSize">13sp</item>
+		<item name="android:textColor">#ffffff</item>
+	</style>
+	
+	<style name="WidgetTime">
+		<item name="android:textColor">#b8ffffff</item>
 	</style>
 
 	<style name="PickAction" parent="android:Theme.Dialog">
