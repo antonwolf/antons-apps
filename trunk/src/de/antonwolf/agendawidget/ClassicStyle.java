@@ -21,16 +21,25 @@
  */
 package de.antonwolf.agendawidget;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import android.content.Context;
 import android.view.View;
 import android.widget.RemoteViews;
 
 public final class ClassicStyle extends Style {
+	private boolean widgetFull = false;
+	private final int maxLines;
+	private final List<Event> birthdayEvents;
+	private final List<Event> agendaEvents;
 
 	public ClassicStyle(WidgetInfo info, int widgetId, Context c) {
 		super(info, widgetId, c);
+		maxLines = Integer.parseInt(info.lines);
+		birthdayEvents = new ArrayList<Event>(maxLines * 2);
+		agendaEvents = new ArrayList<Event>(maxLines);
 	}
 
 	public RemoteViews render() {
@@ -70,5 +79,23 @@ public final class ClassicStyle extends Style {
 		widget.setInt(R.id.widget, "setBackgroundResource", background);
 
 		return widget;
+	}
+
+	@Override
+	public void addEvent(Event e) {
+		widgetFull = Math.ceil(birthdayEvents.size() / 2.0)
+				+ agendaEvents.size() >= maxLines;
+		if (e.isBirthday) {
+			if (!birthdayEvents.contains(e))
+				birthdayEvents.add(e);
+		} else if (!widgetFull)
+			agendaEvents.add(e);
+
+	}
+
+	@Override
+	public boolean isFull() {
+		boolean evenBirthdayCount = birthdayEvents.size() % 2 == 0;
+		return widgetFull && evenBirthdayCount;
 	}
 }
