@@ -21,8 +21,8 @@
  */
 package de.antonwolf.agendawidget;
 
-import java.util.Formatter;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -34,9 +34,13 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 public final class TwoLinesStyle extends Style {
+	private int spaceLeft;
+	private final List<Event> events;
 
 	public TwoLinesStyle(WidgetInfo info, int widgetId, Context c) {
 		super(info, widgetId, c);
+		spaceLeft = Integer.parseInt(info.lines);
+		events = new ArrayList<Event>(spaceLeft);
 	}
 
 	@Override
@@ -46,50 +50,40 @@ public final class TwoLinesStyle extends Style {
 		widget.removeAllViews(R.id.widget);
 		widget.setOnClickPendingIntent(R.id.widget, onClick);
 
-		Iterator<Event> bdayIterator = birthdayEvents.iterator();
-		while (bdayIterator.hasNext()) {
-			final RemoteViews view = new RemoteViews(packageName,
-					R.layout.birthdays_two_lines);
-			formatBirthday(bdayIterator.next(), view, R.id.first_time,
-					R.id.first_text, info);
-			if (bdayIterator.hasNext())
-				formatBirthday(bdayIterator.next(), view, R.id.second_time,
-						R.id.second_text, info);
-			else
-				formatBirthday(null, view, R.id.second_time, R.id.second_text,
-						info);
-			widget.addView(R.id.widget, view);
-		}
+		// TODO: Font size
+		
+		for (Event event : events) {
+			final RemoteViews view;
+			if (event.allDay) {
+				view = new RemoteViews(packageName, R.layout.event_all_day);
+				view.setTextViewText(R.id.text,
+						formatEventText(event, false, info));
+			} else {
+				view = new RemoteViews(packageName, R.layout.event_two_lines);
+				
+				final SpannableStringBuilder firstLine = new SpannableStringBuilder();
+				final int timeStartPos = firstLine.length();
+				formatTime(firstLine, event, info);
+				firstLine.append(' ');
+				if (event.location != null) {
+					firstLine.append(SEPARATOR_COMMA);
+					firstLine.append(event.location);
+				}
+				firstLine.setSpan(new ForegroundColorSpan(DATETIME_COLOR),
+						timeStartPos, firstLine.length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				view.setTextViewText(R.id.first_line, firstLine);
 
-		for (Event event : agendaEvents) {
-			final RemoteViews view = new RemoteViews(packageName,
-					R.layout.event_two_lines);
-
-			final SpannableStringBuilder firstLine = new SpannableStringBuilder();
-			final int timeStartPos = firstLine.length();
-			formatTime(firstLine, event, info);
-			firstLine.append(' ');
-			if (event.location != null) {
-				firstLine.append(SEPARATOR_COMMA);
-				firstLine.append(event.location);
+				final SpannableStringBuilder secondLine = new SpannableStringBuilder();
+				secondLine.append(event.title);
+				secondLine.setSpan(new ForegroundColorSpan(0xffffffff), 0,
+						secondLine.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				view.setTextViewText(R.id.second_line, secondLine);
 			}
-			firstLine.setSpan(new ForegroundColorSpan(DATETIME_COLOR),
-					timeStartPos, firstLine.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			view.setTextViewText(R.id.first_line, firstLine);
-
-			final SpannableStringBuilder secondLine = new SpannableStringBuilder();
-			secondLine.append(event.title);
-			secondLine.setSpan(new ForegroundColorSpan(0xffffffff), 0,
-					secondLine.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			view.setTextViewText(R.id.second_line, secondLine);
-			// final float size = Integer.parseInt(info.size) / 100f;
-			// builder.setSpan(new RelativeSizeSpan(size), 0, builder.length(),
-			// 0);
-
+			
 			int alarmFlag = event.hasAlarm ? View.VISIBLE : View.GONE;
 			view.setViewVisibility(R.id.alarm, alarmFlag);
-			// calendarColor`!!
+			
 			Bitmap a = Bitmap.createBitmap(new int[] { event.color }, 1, 1,
 					Config.ARGB_8888);
 			view.setImageViewBitmap(R.id.color, a);
@@ -103,18 +97,21 @@ public final class TwoLinesStyle extends Style {
 		return widget;
 	}
 
-	private void formatBirthday(Event event, RemoteViews view, int idTime,
-			int idText, WidgetInfo info) {
-		if (event == null) {
-			view.setTextViewText(idTime, "");
-			view.setTextViewText(idText, "");
-			return;
+	@Override
+	public void addEvent(Event e) {
+		if (!events.contains(e)) {
+			if (e.allDay && spaceLeft >= 1) {
+				spaceLeft -= 1;
+				events.add(e);
+			} else if (spaceLeft >= 2) {
+				spaceLeft -= 2;
+				events.add(e);
+			}
 		}
-		final SpannableStringBuilder timeBuilder = new SpannableStringBuilder();
-		final Formatter timeFormatter = new Formatter();
-		appendDay(timeFormatter, timeBuilder, event.startMillis,
-				event.startTime, info);
-		view.setTextViewText(idTime, timeBuilder);
-		view.setTextViewText(idText, event.title);
+	}
+
+	@Override
+	public boolean isFull() {
+		return spaceLeft <= 0;
 	}
 }

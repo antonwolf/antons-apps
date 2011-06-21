@@ -21,9 +21,7 @@
  */
 package de.antonwolf.agendawidget;
 
-import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.List;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -35,7 +33,6 @@ import android.text.format.Time;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.widget.RemoteViews;
-import de.antonwolf.agendawidget.Event;
 
 public abstract class Style {
 	private final long yesterdayStart;
@@ -51,10 +48,6 @@ public abstract class Style {
 	private final String formatTomorrow;
 	private final String[] formatWeekdays;
 
-	protected final int maxLines;
-	protected final List<Event> birthdayEvents;
-	protected final List<Event> agendaEvents;
-	private boolean widgetFull = false;
 	protected final String packageName;
 
 	protected final PendingIntent onClick;
@@ -76,9 +69,6 @@ public abstract class Style {
 	public Style(final WidgetInfo info, final int widgetId, final Context c) {
 		this.info = info;
 		
-		maxLines = Integer.parseInt(info.lines);
-		birthdayEvents = new ArrayList<Event>(maxLines * 2);
-		agendaEvents = new ArrayList<Event>(maxLines);
 		packageName = c.getPackageName();
 
 		final Intent pickAction = new Intent("pick", Uri.parse("widget://"
@@ -108,20 +98,9 @@ public abstract class Style {
 		oneWeekFromNow = now.setJulianDay(julianDay + 8);
 	}
 
-	public void addEvent(Event e) {
-		widgetFull = Math.ceil(birthdayEvents.size() / 2.0)
-				+ agendaEvents.size() >= maxLines;
-		if (e.isBirthday) {
-			if (!birthdayEvents.contains(e))
-				birthdayEvents.add(e);
-		} else if (!widgetFull)
-			agendaEvents.add(e);
-	}
+	public abstract void addEvent(Event e);
 
-	public boolean isFull() {
-		boolean evenBirthdayCount = birthdayEvents.size() % 2 == 0;
-		return widgetFull && evenBirthdayCount;
-	}
+	public abstract boolean isFull();
 
 	public abstract RemoteViews render();
 
