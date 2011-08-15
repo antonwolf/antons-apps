@@ -21,20 +21,22 @@
  */
 package de.antonwolf.agendawidget;
 
-import java.util.Formatter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.Time;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
+import android.view.View;
 import android.widget.RemoteViews;
 
-public abstract class Style {
+public class Style {
 	private final long yesterdayStart;
 	private final long todayStart;
 	private final long tomorrowStart;
@@ -51,7 +53,7 @@ public abstract class Style {
 	protected final String packageName;
 
 	protected final PendingIntent onClick;
-	
+
 	protected final WidgetInfo info;
 
 	protected final static int[] BACKGROUNDS = new int[] {
@@ -64,11 +66,18 @@ public abstract class Style {
 	protected final static String SEPARATOR_COMMA = ", ";
 
 	protected final static long DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
-	protected final static int DATETIME_COLOR = 0xb8ffffff;
+	protected final static ForegroundColorSpan DATETIME_COLOR_SPAN = new ForegroundColorSpan(
+			0xffbbbbbb);
+	protected final static ForegroundColorSpan FOREGROUND_COLOR_SPAN = new ForegroundColorSpan(
+			0xffffffff);
+	private boolean widgetFull = false;
+	private final int maxLines;
+	private final List<Event> birthdayEvents;
+	private final List<Event> agendaEvents;
 
 	public Style(final WidgetInfo info, final int widgetId, final Context c) {
 		this.info = info;
-		
+
 		packageName = c.getPackageName();
 
 		final Intent pickAction = new Intent("pick", Uri.parse("widget://"
@@ -96,31 +105,147 @@ public abstract class Style {
 		tomorrowStart = now.setJulianDay(julianDay + 1);
 		dayAfterTomorrowStart = now.setJulianDay(julianDay + 2);
 		oneWeekFromNow = now.setJulianDay(julianDay + 8);
+
+		maxLines = Integer.parseInt(info.lines);
+		birthdayEvents = new ArrayList<Event>(maxLines * 2);
+		agendaEvents = new ArrayList<Event>(maxLines);
 	}
 
-	public abstract void addEvent(Event e);
+	public RemoteViews render() {
+		RemoteViews widget = new RemoteViews(packageName,
+				R.layout.widget_classic);
+		widget.removeAllViews(R.id.widget);
+		widget.setOnClickPendingIntent(R.id.widget, onClick);
 
-	public abstract boolean isFull();
+		final int calendarColor = info.calendarColor ? View.VISIBLE : View.GONE;
 
-	public abstract RemoteViews render();
+		Iterator<Event> bdayIterator = birthdayEvents.iterator();
+		while (bdayIterator.hasNext()) {
+			final RemoteViews view = new RemoteViews(packageName,
+					R.layout.birthdays);
+			final Event left = bdayIterator.next();
+			view.setTextViewText(R.id.left_time, formatTime(left));
+			view.setTextViewText(R.id.left_title, formatTitle(left));
 
-	protected void appendHour(final Formatter formatter,
-			final SpannableStringBuilder builder, final long time,
-			final WidgetInfo info) {
-		if (info.twentyfourHours)
-			formatter.format("%1$tk:%1$tM", time);
-		else {
-			formatter.format("%1$tl:%1$tM", time);
-			final int start = builder.length();
-			formatter.format("%1$tp", time);
-			final int end = builder.length();
-			builder.setSpan(new RelativeSizeSpan(0.5f), start, end, 0);
+			if (bdayIterator.hasNext()) {
+				final Event right = bdayIterator.next();
+				view.setTextViewText(R.id.right_time, formatTime(right));
+				view.setTextViewText(R.id.right_title, formatTitle(right));
+			} else {
+				view.setTextViewText(R.id.right_time, "");
+				view.setTextViewText(R.id.right_title, "");
+			}
+
+			view.setViewVisibility(R.id.color, calendarColor);
+			widget.addView(R.id.widget, view);
 		}
+
+		for (Event event : agendaEvents) {
+			final RemoteViews view = new RemoteViews(packageName,
+					R.layout.event);
+			view.setTextViewText(R.id.time, formatTime(event));
+			final CharSequence title = formatTitle(event);
+			if (event.location != null) {
+				final SpannableStringBuilder builder = new SpannableStringBuilder(
+						title);
+				final int from = builder.length();
+				builder.append(SEPARATOR_COMMA);
+				builder.append(event.location);
+				builder.setSpan(DATETIME_COLOR_SPAN, from, builder.length(), 0);
+				view.setTextViewText(R.id.text, builder);
+			} else
+				view.setTextViewText(R.id.text, title);
+
+			int alarmFlag = event.hasAlarm ? View.VISIBLE : View.GONE;
+			view.setViewVisibility(R.id.event_alarm, alarmFlag);
+			view.setInt(R.id.color, "setColorFilter", event.color);
+			view.setViewVisibility(R.id.color, calendarColor);
+			widget.addView(R.id.widget, view);
+		}
+
+		final int opacityIndex = Integer.parseInt(info.opacity) / 20;
+		final int background = BACKGROUNDS[opacityIndex];
+		widget.setInt(R.id.widget, "setBackgroundResource", background);
+
+		return widget;
 	}
 
-	protected void appendDay(final Formatter formatter,
-			final SpannableStringBuilder builder, final long time,
-			final Time day, final WidgetInfo info) {
+	public void addEvent(Event e) {
+		widgetFull = Math.ceil(birthdayEvents.size() / 2.0)
+				+ agendaEvents.size() >= maxLines;
+		if (e.isBirthday) {
+			if (!birthdayEvents.contains(e))
+				birthdayEvents.add(e);
+		} else if (!widgetFull)
+			agendaEvents.add(e);
+	}
+
+	public boolean isFull() {
+		boolean evenBirthdayCount = birthdayEvents.size() % 2 == 0;
+		return widgetFull && evenBirthdayCount;
+	}
+
+	private CharSequence formatTitle(Event event) {
+		if (event.title == null) {
+			final SpannableStringBuilder builder = new SpannableStringBuilder(
+					event.title);
+			builder.append('-');
+			builder.setSpan(DATETIME_COLOR_SPAN, 0, builder.length(), 0);
+			return builder;
+		} else
+			return event.title;
+	}
+
+	protected CharSequence formatTime(final Event event) {
+		final SpannableStringBuilder builder = new SpannableStringBuilder();
+		final boolean isStartToday = (todayStart <= event.startMillis && event.startMillis <= tomorrowStart);
+		final boolean isEndToday = (todayStart <= event.endMillis && event.endMillis <= tomorrowStart);
+		final boolean showStartDay = !isStartToday || !isEndToday
+				|| event.allDay;
+		if (showStartDay)
+			builder.append(formatDay(event.startMillis, event.startDay));
+		// all-Day events
+		if (event.allDay) {
+			if (event.startDay != event.endDay) {
+				builder.append('-');
+				builder.append(formatDay(event.endMillis, event.endDay));
+			}
+		}
+		// events with no duration
+		else if (!info.endTime || event.startMillis == event.endMillis) {
+			if (showStartDay)
+				builder.append(' ');
+			builder.append(formatHour(event.startMillis, info));
+		} else {
+			// events with duration
+			if (showStartDay)
+				builder.append(' ');
+			builder.append(formatHour(event.startMillis, info));
+			builder.append('-');
+
+			if (event.endMillis - event.startMillis > DAY_IN_MILLIS) {
+				builder.append(formatDay(event.endMillis, event.endDay));
+				builder.append(' ');
+			}
+			builder.append(formatHour(event.endMillis, info));
+		}
+		return builder;
+	}
+
+	protected CharSequence formatHour(final long time, final WidgetInfo info) {
+		if (info.twentyfourHours)
+			return String.format("%1$tk:%1$tM", time);
+
+		SpannableStringBuilder builder = new SpannableStringBuilder();
+		builder.append(String.format("%1$tl:%1$tM", time));
+		final int start = builder.length();
+		builder.append(String.format("%1$tp", time));
+		final int end = builder.length();
+		builder.setSpan(new RelativeSizeSpan(0.5f), start, end, 0);
+		return builder;
+	}
+
+	private CharSequence formatDay(long time, int day) {
 		final boolean tomorrowYesterday = info.tomorrowYesterday;
 		final long specialStart = tomorrowYesterday ? yesterdayStart
 				: todayStart;
@@ -130,119 +255,23 @@ public abstract class Style {
 		final long weekEnd = weekday ? oneWeekFromNow : tomorrowStart;
 
 		if (specialStart <= time && time < specialEnd) {
-			final int from = builder.length();
+			final String result;
 			if (time < todayStart)
-				builder.append(formatYesterday);
+				result = formatYesterday;
 			else if (time < tomorrowStart)
-				builder.append(formatToday);
+				result = formatToday;
 			else
-				builder.append(formatTomorrow);
+				result = formatTomorrow;
 
-			final RelativeSizeSpan smaller = new RelativeSizeSpan(0.5f);
-			builder.setSpan(smaller, from, builder.length(), 0);
-		} else if (todayStart <= time && time < weekEnd) // this week?
-			builder.append(formatWeekdays[day.weekDay]);
-		else if (yearStart <= time && time < yearEnd) // this year?
-			formatter.format(info.dateFormat.shortFormat, time);
-		else
-			// not this year
-			formatter.format(info.dateFormat.longFormat, time);
-	}
-
-	protected CharSequence formatEventText(final Event event,
-			final boolean showColor, final WidgetInfo info) {
-		if (event == null)
-			return "";
-
-		final SpannableStringBuilder builder = new SpannableStringBuilder();
-
-		if (showColor)
-			appendDot(event, builder);
-
-		final int timeStartPos = builder.length();
-		formatTime(builder, event, info);
-		builder.append(' ');
-		final int timeEndPos = builder.length();
-		builder.setSpan(new ForegroundColorSpan(DATETIME_COLOR), timeStartPos,
-				timeEndPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-		builder.append(event.title);
-		final int titleEndPos = builder.length();
-		builder.setSpan(new ForegroundColorSpan(0xffffffff), timeEndPos,
-				titleEndPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-		if (event.location != null) {
-			builder.append(SEPARATOR_COMMA);
-			builder.append(event.location);
-			builder.setSpan(new ForegroundColorSpan(DATETIME_COLOR),
-					titleEndPos, builder.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			final SpannableStringBuilder builder = new SpannableStringBuilder(
+					result);
+			builder.setSpan(new RelativeSizeSpan(0.75f), 0, builder.length(), 0);
+			return builder;
 		}
-
-		final float size = Integer.parseInt(info.size) / 100f;
-		builder.setSpan(new RelativeSizeSpan(size), 0, builder.length(), 0);
-
-		return builder;
-	}
-
-	protected void appendDot(final Event event,
-			final SpannableStringBuilder builder) {
-		if (event.isBirthday)
-			builder.append(COLOR_HIDDEN);
-		else {
-			builder.append(COLOR_DOT);
-			builder.setSpan(new ForegroundColorSpan(event.color), 0, 1,
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		}
-	}
-
-	protected void formatTime(final SpannableStringBuilder builder,
-			final Event event, final WidgetInfo info) {
-		final Formatter formatter = new Formatter(builder);
-
-		final boolean isStartToday = (todayStart <= event.startMillis && event.startMillis <= tomorrowStart);
-		final boolean isEndToday = (todayStart <= event.endMillis && event.endMillis <= tomorrowStart);
-		final boolean showStartDay = !isStartToday || !isEndToday
-				|| event.allDay;
-
-		// all-Day events
-		if (event.allDay) {
-			if (showStartDay)
-				appendDay(formatter, builder, event.startMillis,
-						event.startTime, info);
-
-			if (event.startDay != event.endDay) {
-				builder.append('-');
-				appendDay(formatter, builder, event.endMillis, event.endTime,
-						info);
-			}
-			return;
-		}
-
-		// events with no duration
-		if (!info.endTime || event.startMillis == event.endMillis) {
-			if (showStartDay) {
-				appendDay(formatter, builder, event.startMillis,
-						event.startTime, info);
-				builder.append(' ');
-			}
-			appendHour(formatter, builder, event.startMillis, info);
-			return;
-		}
-
-		// events with duration
-		if (showStartDay) {
-			appendDay(formatter, builder, event.startMillis, event.startTime,
-					info);
-			builder.append(' ');
-		}
-		appendHour(formatter, builder, event.startMillis, info);
-		builder.append('-');
-
-		if (event.endMillis - event.startMillis > DAY_IN_MILLIS) {
-			appendDay(formatter, builder, event.endMillis, event.endTime, info);
-			builder.append(' ');
-		}
-		appendHour(formatter, builder, event.endMillis, info);
+		if (todayStart <= time && time < weekEnd) // this week?
+			return formatWeekdays[(day + 1) % 7];
+		if (yearStart <= time && time < yearEnd) // this year?
+			return String.format(info.dateFormat.shortFormat, time);
+		return String.format(info.dateFormat.longFormat, time);
 	}
 }

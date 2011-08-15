@@ -83,7 +83,7 @@ public final class WidgetService extends IntentService {
 		}
 		final WidgetInfo info = new WidgetInfo(widgetId, this);
 
-		final Style style = new TwoLinesStyle(info, widgetId, this);
+		final Style style = new Style(info, widgetId, this);
 
 		Cursor cursor = null;
 		final Time now = new Time();
@@ -141,16 +141,11 @@ public final class WidgetService extends IntentService {
 		if (1 == cursor.getInt(COL_ALL_DAY))
 			event.allDay = true;
 
+		event.startDay = cursor.getInt(COL_START_DAY);
+		event.startMillis = cursor.getLong(COL_START_MILLIS);
 		event.endDay = cursor.getInt(COL_END_DAY);
-		event.endTime = new Time();
-
-		if (event.allDay) {
-			event.endTime.timezone = Time.getCurrentTimezone();
-			event.endMillis = event.endTime.setJulianDay(event.endDay);
-		} else {
-			event.endMillis = cursor.getLong(COL_END_MILLIS);
-			event.endTime.set(event.endMillis);
-		}
+		event.endMillis = cursor.getLong(COL_END_MILLIS);
+		
 		if ((event.allDay && event.endMillis < todayStart)
 				|| (!event.allDay && event.endMillis <= System
 						.currentTimeMillis()))
@@ -173,16 +168,6 @@ public final class WidgetService extends IntentService {
 		// Skip birthday events if necessary
 		if (event.isBirthday && info.birthdays.equals(WidgetInfo.BIRTHDAY_HIDE))
 			return null;
-
-		event.startDay = cursor.getInt(COL_START_DAY);
-		event.startTime = new Time();
-		if (event.allDay) {
-			event.startTime.timezone = event.endTime.timezone;
-			event.startMillis = event.startTime.setJulianDay(event.startDay);
-		} else {
-			event.startMillis = cursor.getLong(COL_START_MILLIS);
-			event.startTime.set(event.startMillis);
-		}
 
 		event.location = cursor.getString(COL_LOCATION);
 		if (event.location != null

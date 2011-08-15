@@ -19,29 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package de.antonwolf.agendawidget;
 
-public final class Event {
-	public boolean allDay = false;
-	public int color;
-	public int endDay;
-	public long endMillis;
-	public boolean hasAlarm;
-	public boolean isBirthday = false;
-	public String location;
-	public long startMillis;
-	public int startDay;
-	public String title;
+package de.antonwolf.agendawidget.widgets;
 
-	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof Event))
-			return false;
 
-		final Event other = (Event) o;
-
-		return isBirthday && other.isBirthday
-				&& other.startDay == this.startDay
-				&& other.title.equals(this.title);
-	}
+public final class Widget2x4 extends WidgetBase {
 }
