@@ -15,6 +15,7 @@
 	<string name="label_3x2">Widget Calendario di Anton (3x2)</string>
 	<string name="label_3x3">Widget Calendario di Anton (3x3)</string>
 	<string name="label_2x1">Widget Calendario di Anton (2x1)</string>
+	<string name="label_2x4">Widget Calendario di Anton (2x4)</string>
 
 	<string-array name="format_day_of_week">
 		<item>Dom</item>
