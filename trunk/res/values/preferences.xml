@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="preference_opacity">Background opacity</string>
+	<string name="preference_opacity_summary">The widget\'s background is %s percent opaque.</string>
+	<string name="preference_opacity_dialog">%s opaque:</string>
+</resources>

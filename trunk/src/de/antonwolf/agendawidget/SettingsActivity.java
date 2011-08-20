@@ -23,6 +23,7 @@ package de.antonwolf.agendawidget;
 
 import java.util.Map.Entry;
 import de.antonwolf.agendawidget.WidgetInfo.CalendarPreferences;
+import de.antonwolf.agendawidget.prefences.OpacityPreference;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -109,25 +110,7 @@ public final class SettingsActivity extends PreferenceActivity {
 		size.setOnPreferenceChangeListener(sizeChanged);
 		display.addPreference(size);
 
-		final ListPreference opacity = new ListPreference(this);
-		opacity.setTitle(R.string.settings_display_opacity);
-		opacity.setKey(info.opacityKey);
-		opacity.setEntries(R.array.settings_display_opacity_entries);
-		opacity.setEntryValues(new String[] { "0", "20", "40", "60", "80",
-				"100" });
-		opacity.setDefaultValue(info.opacityDefault);
-		final OnPreferenceChangeListener opacityChanged = new OnPreferenceChangeListener() {
-			@Override
-			public boolean onPreferenceChange(final Preference pref,
-					final Object newValue) {
-				pref.setSummary(getResources().getString(
-						R.string.settings_display_opacity_summary, newValue));
-				return true;
-			}
-		};
-		opacityChanged.onPreferenceChange(opacity, info.opacity);
-		opacity.setOnPreferenceChangeListener(opacityChanged);
-		display.addPreference(opacity);
+		display.addPreference(new OpacityPreference(this, info));
 
 		final ListPreference birthdays = new ListPreference(this);
 		birthdays.setTitle(R.string.settings_birthdays);

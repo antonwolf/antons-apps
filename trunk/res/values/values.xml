@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<dimen name="widget_corners">8dp</dimen>
+	
 	<string name="app_name">Anton\'s Calendar Widget</string>
 	
 	<string name="widget_loading">Loading...</string>
@@ -79,17 +81,6 @@
 		<item>150%</item>
 		<item>200%</item>
 		<item>250%</item>
-	</string-array>
-	
-	<string name="settings_display_opacity">Background opacity</string>
-	<string name="settings_display_opacity_summary">The widget\'s background is %s percent opaque.</string>
-	<string-array name="settings_display_opacity_entries">
-		<item>0% opaque (fully transparent)</item>
-		<item>20% opaque</item>
-		<item>40% opaque</item>
-		<item>60% opaque (default)</item>
-		<item>80% opaque</item>
-		<item>100% opaque (fully opaque)</item>
 	</string-array>
 	
 	<string name="settings_birthdays">Birthdays</string>

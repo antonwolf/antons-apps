@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<level-list xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:maxLevel="0" android:drawable="@drawable/background_0" />
+	<item android:maxLevel="6" android:drawable="@drawable/background_1" />
+	<item android:maxLevel="13" android:drawable="@drawable/background_2" />
+	<item android:maxLevel="20" android:drawable="@drawable/background_3" />
+	<item android:maxLevel="26" android:drawable="@drawable/background_4" />
+	<item android:maxLevel="33" android:drawable="@drawable/background_5" />
+	<item android:maxLevel="40" android:drawable="@drawable/background_6" />
+	<item android:maxLevel="46" android:drawable="@drawable/background_7" />
+	<item android:maxLevel="53" android:drawable="@drawable/background_8" />
+	<item android:maxLevel="60" android:drawable="@drawable/background_9" />
+	<item android:maxLevel="66" android:drawable="@drawable/background_a" />
+	<item android:maxLevel="73" android:drawable="@drawable/background_b" />
+	<item android:maxLevel="80" android:drawable="@drawable/background_c" />
+	<item android:maxLevel="86" android:drawable="@drawable/background_d" />
+	<item android:maxLevel="93" android:drawable="@drawable/background_e" />
+	<item android:maxLevel="100" android:drawable="@drawable/background_f" />
+</level-list>
