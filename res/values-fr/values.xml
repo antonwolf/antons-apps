@@ -65,9 +65,6 @@
 		<item>25 lignes</item>
 	</string-array>
 
-	<string name="settings_display_size">Taille du texte</string>
-	<string name="settings_display_size_summary">Taille du texte est à %s pour cent.</string>
-
 	<string name="settings_birthdays">Anniversaires</string>
 	<string-array name="settings_birthdays_summaries">
 		<item>Afficher les événements qui ont été reconnus comme un

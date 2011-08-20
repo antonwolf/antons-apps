@@ -65,9 +65,6 @@
 		<item>25 righe</item>
 	</string-array>
 
-	<string name="settings_display_size">Grandezza del testo</string>
-	<string name="settings_display_size_summary">La dimensione del testo è %s per cento.</string>
-
 	<string name="settings_birthdays">Compleanni</string>
 	<string-array name="settings_birthdays_summaries">
 		<item>Visualizzare gli eventi che sono riconosciuti come compleanni

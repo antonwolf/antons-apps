@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<string name="preference_font_size">Grandezza del testo</string>
+	<string name="preference_font_size_summary">La dimensione del testo è %d%%.</string>
+
 	<string name="preference_opacity">Trasparenza dello sfondo</string>
 	<string name="preference_opacity_summary">Lo sfondo del widget è di %d%% opaco.
 	</string>

@@ -67,9 +67,6 @@
 		<item>25 linjer</item>
 	</string-array>
 
-	<string name="settings_display_size">Skriftstørrelse</string>
-	<string name="settings_display_size_summary">Skriftstørrelsen er %s procent.</string>
-
 	<string name="settings_birthdays">Fødselsdage</string>
 	<string-array name="settings_birthdays_summaries">
 		<item>Vis begivenheder, som anses for fødselsdage, seperat.</item>

@@ -3,9 +3,9 @@
 	android:layout_width="match_parent" android:layout_height="0dp"
 	android:layout_weight="1" android:orientation="horizontal"
 	android:gravity="left|center_vertical">
-	<ImageView android:layout_width="3dp" android:layout_height="10sp"
+	<ImageView android:layout_width="3dp" android:layout_height="10dp"
 		android:id="@+id/color" android:scaleType="fitXY"
-		android:layout_marginBottom="2sp" android:layout_marginTop="1sp"
+		android:layout_marginBottom="2dp" android:layout_marginTop="1dp"
 		android:layout_marginRight="3dp" android:src="@drawable/color" />
 	<TextView style="@style/WidgetTime" android:id="@+id/time" />
 	<TextView android:layout_weight="1" style="@style/WidgetText"

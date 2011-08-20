@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<string name="preference_font_size">Schriftgröße</string>
+	<string name="preference_font_size_summary">Die Schriftgröße ist bei %s%%.</string>
+
 	<string name="preference_opacity">Transparenz des Hintergrunds</string>
 	<string name="preference_opacity_summary">Der Hintergrund des Widgets ist zu %d%% deckend.
 	</string>

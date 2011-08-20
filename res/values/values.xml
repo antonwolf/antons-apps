@@ -71,18 +71,6 @@
 		<item>25 lines</item>
 	</string-array>
 	
-	<string name="settings_display_size">Font size</string>
-	<string name="settings_display_size_summary">Font size is %s percent.</string>
-	<string-array name="settings_display_size_entries">
-		<item>50%</item>
-		<item>75%</item>
-		<item>100%</item>
-		<item>125%</item>
-		<item>150%</item>
-		<item>200%</item>
-		<item>250%</item>
-	</string-array>
-	
 	<string name="settings_birthdays">Birthdays</string>
 	<string-array name="settings_birthdays_summaries">
 		<item>Display events that are recognized as birthdays separately.

@@ -69,9 +69,6 @@
 		<item>25 Zeilen</item>
 	</string-array>
 
-	<string name="settings_display_size">Schriftgröße</string>
-	<string name="settings_display_size_summary">Die Schriftgröße ist bei %s Prozent.</string>
-
 	<string name="settings_birthdays">Geburtstage</string>
 	<string-array name="settings_birthdays_summaries">
 		<item>Als Geburtstag erkannte Ereignisse gesondert anzeigen.</item>

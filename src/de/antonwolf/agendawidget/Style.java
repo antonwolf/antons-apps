@@ -118,16 +118,18 @@ public class Style {
 			final RemoteViews view = new RemoteViews(packageName,
 					R.layout.birthdays);
 			final Event left = bdayIterator.next();
-			view.setTextViewText(R.id.left_time, formatTime(left));
-			view.setTextViewText(R.id.left_title, formatTitle(left));
+			view.setTextViewText(R.id.left_time, resizeText(formatTime(left)));
+			view.setTextViewText(R.id.left_title, resizeText(formatTitle(left)));
 
 			if (bdayIterator.hasNext()) {
 				final Event right = bdayIterator.next();
-				view.setTextViewText(R.id.right_time, formatTime(right));
-				view.setTextViewText(R.id.right_title, formatTitle(right));
+				view.setTextViewText(R.id.right_time,
+						resizeText(formatTime(right)));
+				view.setTextViewText(R.id.right_title,
+						resizeText(formatTitle(right)));
 			} else {
-				view.setTextViewText(R.id.right_time, "");
-				view.setTextViewText(R.id.right_title, "");
+				view.setTextViewText(R.id.right_time, resizeText(""));
+				view.setTextViewText(R.id.right_title, resizeText(""));
 			}
 
 			view.setViewVisibility(R.id.color, calendarColor);
@@ -137,18 +139,18 @@ public class Style {
 		for (Event event : agendaEvents) {
 			final RemoteViews view = new RemoteViews(packageName,
 					R.layout.event);
-			view.setTextViewText(R.id.time, formatTime(event));
-			final CharSequence title = formatTitle(event);
+			view.setTextViewText(R.id.time, resizeText(formatTime(event)));
+			CharSequence text = formatTitle(event);
 			if (event.location != null) {
 				final SpannableStringBuilder builder = new SpannableStringBuilder(
-						title);
+						text);
 				final int from = builder.length();
 				builder.append(SEPARATOR_COMMA);
 				builder.append(event.location);
 				builder.setSpan(DATETIME_COLOR_SPAN, from, builder.length(), 0);
-				view.setTextViewText(R.id.text, builder);
-			} else
-				view.setTextViewText(R.id.text, title);
+				text = builder;
+			}
+			view.setTextViewText(R.id.text, resizeText(text));
 
 			int alarmFlag = event.hasAlarm ? View.VISIBLE : View.GONE;
 			view.setViewVisibility(R.id.event_alarm, alarmFlag);
@@ -266,5 +268,17 @@ public class Style {
 		if (yearStart <= time && time < yearEnd) // this year?
 			return String.format(info.dateFormat.shortFormat, time);
 		return String.format(info.dateFormat.longFormat, time);
+	}
+
+	private SpannableStringBuilder resizeText(CharSequence text) {
+		SpannableStringBuilder builder;
+		if (text instanceof SpannableStringBuilder)
+			builder = (SpannableStringBuilder) text;
+		else
+			builder = new SpannableStringBuilder(text);
+
+		builder.setSpan(new RelativeSizeSpan(info.fontSize), 0,
+				builder.length(), 0);
+		return builder;
 	}
 }
