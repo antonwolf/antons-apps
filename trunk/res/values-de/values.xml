@@ -72,18 +72,6 @@
 	<string name="settings_display_size">Schriftgröße</string>
 	<string name="settings_display_size_summary">Die Schriftgröße ist bei %s Prozent.</string>
 
-	<string name="settings_display_opacity">Transparenz des Hintergrunds</string>
-	<string name="settings_display_opacity_summary">Der Hintergrund des Widgets ist zu %s Prozent deckend.
-	</string>
-	<string-array name="settings_display_opacity_entries">
-		<item>0% deckend (völlig transparent)</item>
-		<item>20% deckend</item>
-		<item>40% deckend</item>
-		<item>60% deckend (Standard)</item>
-		<item>80% deckend</item>
-		<item>100% deckend (völlig deckend)</item>
-	</string-array>
-
 	<string name="settings_birthdays">Geburtstage</string>
 	<string-array name="settings_birthdays_summaries">
 		<item>Als Geburtstag erkannte Ereignisse gesondert anzeigen.</item>

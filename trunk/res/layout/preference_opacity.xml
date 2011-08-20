@@ -3,7 +3,16 @@
 	android:layout_width="match_parent" android:layout_height="wrap_content"
 	android:orientation="vertical">
 	<SeekBar android:layout_width="match_parent" android:id="@+id/bar"
-		android:layout_height="wrap_content" android:layout_margin="10dp" />
-	<TextView android:text="TextView" android:id="@+id/value"
-		android:layout_width="wrap_content" android:layout_height="wrap_content" />
+		android:layout_height="wrap_content" android:layout_margin="5dp" />
+
+	<RelativeLayout android:layout_width="match_parent"
+		android:layout_height="120dp">
+		<ImageView android:background="@drawable/checkerboard"
+			android:id="@+id/checkerboard" android:src="@drawable/background"
+			android:layout_width="match_parent" android:layout_height="match_parent"
+			android:scaleType="fitXY" android:padding="5dp" />
+		<TextView android:text="TextView" android:id="@+id/value"
+			style="@style/WidgetText" android:layout_width="match_parent"
+			android:layout_height="match_parent" android:gravity="center" />
+	</RelativeLayout>
 </LinearLayout>

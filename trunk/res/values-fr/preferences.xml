@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="preference_opacity">Transparence de l\'arrière-plan</string>
+	<string name="preference_opacity_summary">L\'arrière-plan du widget est %d%% opaque.</string>
+	<string name="preference_opacity_dialog">%d%% opaque</string>
+</resources>

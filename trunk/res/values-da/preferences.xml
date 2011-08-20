@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="preference_opacity">Gennemsigtighed</string>
+	<string name="preference_opacity_summary">Baggrunden er %d skjult gennem widget.
+        </string>
+	<string name="preference_opacity_dialog">%d%% dækkende</string>
+</resources>
