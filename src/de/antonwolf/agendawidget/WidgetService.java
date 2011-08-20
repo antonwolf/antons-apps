@@ -61,6 +61,7 @@ public final class WidgetService extends IntentService {
 	public final static int COL_START_MILLIS = 9;
 
 	private static long todayStart;
+	private static int today;
 
 	private final static Pattern IS_EMPTY_PATTERN = Pattern.compile("^\\s*$");
 
@@ -88,6 +89,7 @@ public final class WidgetService extends IntentService {
 		Cursor cursor = null;
 		final Time now = new Time();
 		now.setToNow();
+		today = Time.getJulianDay(System.currentTimeMillis(), now.gmtoff);
 		now.second = 0;
 		now.minute = 0;
 		now.hour = 0;
@@ -146,7 +148,7 @@ public final class WidgetService extends IntentService {
 		event.endDay = cursor.getInt(COL_END_DAY);
 		event.endMillis = cursor.getLong(COL_END_MILLIS);
 		
-		if ((event.allDay && event.endMillis < todayStart)
+		if ((event.allDay && event.endDay < today)
 				|| (!event.allDay && event.endMillis <= System
 						.currentTimeMillis()))
 			return null; // Skip events in the past

@@ -1,0 +1,54 @@
+de.antonwolf.agendawidget.PickActionActivity:
+    public static final java.lang.String EXTRA_WIDGET_ID
+    private static final java.lang.String TAG
+de.antonwolf.agendawidget.R
+de.antonwolf.agendawidget.R$array
+de.antonwolf.agendawidget.R$attr
+de.antonwolf.agendawidget.R$bool
+de.antonwolf.agendawidget.R$drawable
+de.antonwolf.agendawidget.R$id
+de.antonwolf.agendawidget.R$layout
+de.antonwolf.agendawidget.R$string
+de.antonwolf.agendawidget.R$style
+de.antonwolf.agendawidget.R$xml
+de.antonwolf.agendawidget.SettingsActivity:
+    public static final java.lang.String EXTRA_WIDGET_ID
+    private static final java.lang.String TAG
+de.antonwolf.agendawidget.WidgetBase:
+    static final java.lang.String TAG
+de.antonwolf.agendawidget.WidgetInfo:
+    public static final java.lang.String BIRTHDAY_SPECIAL
+    public static final java.lang.String BIRTHDAY_NORMAL
+    public static final java.lang.String BIRTHDAY_HIDE
+    private static final java.lang.String BIRTHDAYS_KEY
+    private static final java.lang.String LINES_KEY
+    private static final java.lang.String SIZE_KEY
+    private static final java.lang.String OPACITY_KEY
+    private static final java.lang.String CALENDAR_COLOR_KEY
+    private static final java.lang.String TOMORROW_YESTERDAY_KEY
+    private static final java.lang.String WEEKDAY_KEY
+    private static final java.lang.String END_TIME_KEY
+    private static final java.lang.String TWENTYFOUR_HOURS_KEY
+    private static final java.lang.String DATE_FORMAT_KEY
+    private static final java.lang.String CALENDARS_KEY
+de.antonwolf.agendawidget.WidgetService:
+    private static final java.lang.String TAG
+    private static final java.lang.String THEAD_NAME
+    private static final java.lang.String CURSOR_FORMAT
+    private static final long SEARCH_DURATION
+    private static final java.lang.String CURSOR_SORT
+    private static final int COL_TITLE
+    private static final int COL_COLOR
+    private static final int COL_LOCATION
+    private static final int COL_ALL_DAY
+    private static final int COL_START_DAY
+    private static final int COL_END_DAY
+    private static final int COL_END_MILLIS
+    private static final int COL_HAS_ALARM
+    private static final int COL_CALENDAR
+    private static final int COL_START_MILLIS
+    private static final java.lang.String COLOR_DOT
+    private static final java.lang.String COLOR_HIDDEN
+    private static final java.lang.String SEPARATOR_COMMA
+    private static final long DAY_IN_MILLIS
+    private static final int DATETIME_COLOR

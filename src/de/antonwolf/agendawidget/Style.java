@@ -56,11 +56,6 @@ public class Style {
 
 	protected final WidgetInfo info;
 
-	protected final static int[] BACKGROUNDS = new int[] {
-			R.drawable.background_0, R.drawable.background_20,
-			R.drawable.background_40, R.drawable.background_60,
-			R.drawable.background_80, R.drawable.background_100 };
-
 	protected final static String COLOR_DOT = "■\t";
 	protected final static String COLOR_HIDDEN = "\t";
 	protected final static String SEPARATOR_COMMA = ", ";
@@ -112,8 +107,7 @@ public class Style {
 	}
 
 	public RemoteViews render() {
-		RemoteViews widget = new RemoteViews(packageName,
-				R.layout.widget_classic);
+		RemoteViews widget = new RemoteViews(packageName, R.layout.widget);
 		widget.removeAllViews(R.id.widget);
 		widget.setOnClickPendingIntent(R.id.widget, onClick);
 
@@ -163,9 +157,8 @@ public class Style {
 			widget.addView(R.id.widget, view);
 		}
 
-		final int opacityIndex = Integer.parseInt(info.opacity) / 20;
-		final int background = BACKGROUNDS[opacityIndex];
-		widget.setInt(R.id.widget, "setBackgroundResource", background);
+		final int opacityPercent = (int) (100 * info.opacity);
+		widget.setInt(R.id.background, "setImageLevel", opacityPercent);
 
 		return widget;
 	}
