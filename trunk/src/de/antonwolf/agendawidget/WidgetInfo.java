@@ -89,17 +89,21 @@ public final class WidgetInfo {
 	public final String linesKey;
 	private static final String LINES_KEY = "%dlines";
 
-	public final String size;
-	public final String sizeDefault = "100";;
-	public final String sizeKey;
-	private static final String SIZE_KEY = "%dsize";
+	public final float fontSize;
+	public final float fontSizeDefault = 1f;
+	public final String fontSizeKey;
+	private static final String FONT_SIZE_KEY = "%dfontSize";
+
+	// TODO: Delete
+	public final String oldFontSizeDefault = "100";
+	private static final String OLD_FONT_SIZE_KEY = "%dsize";
 
 	public final float opacity;
 	public final float opacityDefault = 0.6f;
 	public final String opacityKey;
 	private static final String OPACITY_KEY = "%dopacityFloat";
 
-	// DELETE SOMETIME
+	// TODO: Delete
 	public final String oldOpacityDefault = "60";
 	private static final String OLD_OPACITY_KEY = "%dopacity";
 
@@ -164,8 +168,11 @@ public final class WidgetInfo {
 		linesKey = String.format(LINES_KEY, widgetId);
 		lines = prefs.getString(linesKey, linesDefault);
 
-		sizeKey = String.format(SIZE_KEY, widgetId);
-		size = prefs.getString(sizeKey, sizeDefault);
+		fontSizeKey = String.format(FONT_SIZE_KEY, widgetId);
+		final String oldFontSizeKey = String
+				.format(OLD_FONT_SIZE_KEY, widgetId);
+		fontSize = prefs.getFloat(fontSizeKey, Float.parseFloat(prefs
+				.getString(oldFontSizeKey, oldFontSizeDefault)) / 100f);
 
 		opacityKey = String.format(OPACITY_KEY, widgetId);
 		final String oldOpacityKey = String.format(OLD_OPACITY_KEY, widgetId);
@@ -232,8 +239,10 @@ public final class WidgetInfo {
 				.edit();
 		editor.remove(String.format(BIRTHDAYS_KEY, widgetId));
 		editor.remove(String.format(LINES_KEY, widgetId));
-		editor.remove(String.format(SIZE_KEY, widgetId));
+		editor.remove(String.format(FONT_SIZE_KEY, widgetId));
+		editor.remove(String.format(OLD_FONT_SIZE_KEY, widgetId));
 		editor.remove(String.format(OPACITY_KEY, widgetId));
+		editor.remove(String.format(OLD_OPACITY_KEY, widgetId));
 		editor.remove(String.format(CALENDAR_COLOR_KEY, widgetId));
 		editor.remove(String.format(TOMORROW_YESTERDAY_KEY, widgetId));
 		editor.remove(String.format(WEEKDAY_KEY, widgetId));

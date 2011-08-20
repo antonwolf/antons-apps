@@ -23,6 +23,7 @@ package de.antonwolf.agendawidget;
 
 import java.util.Map.Entry;
 import de.antonwolf.agendawidget.WidgetInfo.CalendarPreferences;
+import de.antonwolf.agendawidget.prefences.FontSizePreference;
 import de.antonwolf.agendawidget.prefences.OpacityPreference;
 import android.content.Intent;
 import android.net.Uri;
@@ -89,26 +90,8 @@ public final class SettingsActivity extends PreferenceActivity {
 		linesChanged.onPreferenceChange(lines, info.lines);
 		lines.setOnPreferenceChangeListener(linesChanged);
 		display.addPreference(lines);
-
-		final ListPreference size = new ListPreference(this);
-		size.setTitle(R.string.settings_display_size);
-		size.setKey(info.sizeKey);
-		size.setEntries(R.array.settings_display_size_entries);
-		size.setEntryValues(new String[] { "50", "75", "100", "125", "150",
-				"200", "250" });
-		size.setDefaultValue(info.sizeDefault);
-		final OnPreferenceChangeListener sizeChanged = new OnPreferenceChangeListener() {
-			@Override
-			public boolean onPreferenceChange(final Preference pref,
-					final Object newValue) {
-				pref.setSummary(getResources().getString(
-						R.string.settings_display_size_summary, newValue));
-				return true;
-			}
-		};
-		sizeChanged.onPreferenceChange(size, info.size);
-		size.setOnPreferenceChangeListener(sizeChanged);
-		display.addPreference(size);
+		
+		display.addPreference(new FontSizePreference(this, info));
 
 		display.addPreference(new OpacityPreference(this, info));
 
