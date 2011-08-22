@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="de-DE"> 
+<head> 
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+	<title>Anton's Calendar Widget</title>  
+	<meta name="author" content="Anton Wolf" /> 
+	<style type="text/css">
+		body{margin:20px 0;font-family:'lucida grande', tahoma, verdana, arial, sans-serif;font-size:11px;line-height:14px}
+		.language{margin:20px 0;}
+		#langSelection{overflow:hidden;background:#D8DFEA;height:40px;}
+		#langSelection>*{float:left;height:38px;padding:1px;margin:0 20px;}
+		#langSelection>*.active{background:#fff;}
+	</style>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+	<script type="text/javascript">
+		jQuery(function($){
+			var lang=(function(){
+				if(!window.navigator.language)
+					return "en";
+				if(!$('.language[lang="' + !window.navigator.language + '"]'))
+					return "en";
+				return window.navigator.language;
+			})();
+			$('<div id="langSelection" />').prependTo('body');
+			$('.language').each(function(){
+				var flag = $(this).find('.flag')
+					.appendTo('#langSelection')
+					.data('lang',$(this))
+					.click(function(){
+						$('#langSelection').children().removeClass('active');
+						$(this).addClass('active');
+						$('.language').hide();
+						$(this).data('lang').show();
+					});
+				if ($(this).attr('lang')!=lang)
+					$(this).hide();
+				else
+					flag.click();
+			});
+		});
+	</script>
+</head> 
+<body>
+	<div lang="en" class="language">
+		<p class="flag"><img src="flags/en.png" alt="English" /></p>
+		<p>This widget displays an agenda of upcoming events in your calendar on your homescreen. The agenda is formatted in a space-efficient way. Displays each event's location and calendar color. Birthday events from Outlook and Facebook can be displayed separately.</p>
+		<p>This is a widget. You must add it to your homescreen!</p>
+		<p>I created this app in my freetime and you can download it for free. Please give me a good rating if you like it!</p>
+		<p>I'm glad about every e-mail, be it praise, critizism or an idea!</p>
+	</div>
+	<div lang="de" class="language">
+		<p class="flag"><img src="flags/de.png" alt="Deutsch" /></p>
+		<p>Dieses Widget zeigt die nächsten Termine in deinem Kalender auf dem Startbildschirm an. Die Liste ist platzsparend formatiert. Für jedes Ereignis werden Ort und Kalender-Farbe angezeigt. Geburtstags-Ereignisse aus Outlook und Facebook können separat behandelt werden.</p>
+		<p>Das hier ist ein Widget, das musst du auf dem Startbildschirm ablegen!</p>
+		<p>Ich habe diese App in meiner Freizeit geschrieben und Du kannst sie kostenlos downloaden. Bitte gib mir eine gute Bewertung, wenn sie dir gefällt!</p>
+		<p>Ich freue mich über E-Mails, egal ob Lob, Kritik oder Ideen!</p>
+	</div>
+	<div lang="fr" class="language">
+		<p class="flag"><img src="flags/fr.png" alt="Français" /></p>
+		<p>Ce widget affiche un agenda des événements à venir dans votre calendrier sur l’écran d'accueil. La liste est formaté de manière peu encombrante. Affiche le lieu et la couleur du calendrier de chaque événement. Événements qui sont des anniversaires d'Outlook et de Facebook peuvent être affichés séparément.<p>
+		<p>Il s'agit d'un widget. Vous devez l'ajouter à votre écran d'accueil!</p>
+		<p>J'ai écritte cette application dans mon temps libre et vous pouvez le télécharger gratuitement. S'il vous plaît donnez-lui un bon avis si vous l'aimez!</p>
+		<p>Je m’en réjouie de chaque e-mail, de la louange, de la critique ou des idées!</p>
+	</div>
+	<div lang="dk" class="language">
+		<p class="flag"><img src="flags/dk.png" alt="Dansk" /></p>
+		<p>Denne widget viser en dagsorden med kommende begivenheder fra dine kalendere på din foretrukne skærm. Listen er formateret til at opnå bedst udnyttelse af skærmpladsen. Den viser hver begivenheds tidsangivelse og farve fra den tilhørende kalender. Begivenheder defineret som fødselsdag i Outlook og Facebook vises separat.</p>
+		<p>Dette er en widget, og den skal tilføjes til din foretrukne skærm.</p>
+		<p>Jeg har lavet denne app i min fritid, og du kan hente den gratis. Husk at give mig god rating, hvis du synes om den!</p>
+		<p>Jeg sætter pris på enhver mail, om det er kritik eller ideer!</p>
+	</div>
+	<div lang="it" class="language">
+		<p class="flag"><img src="flags/it.png" alt="Italiano" /></p>
+		<p>Questo widget mostra le prossime date in calendario sulla schermata Home. L'elenco è formattato in modo efficiente dello spazio. Mostra il luogo di ogni evento e il colore del calendario. Gli eventi qui sono compleanni da Outlook e Facebook possono essere visualizzati separatamente.</p>
+		<p>Questo è un widget. È necessario aggiungere alla schermata Home!</p>
+		<p>Ho creato quest’applicazione nel mio tempo libero e si può scaricare gratuitamente. Per favore mi dia una buona recensione se ti piace!</p>
+		<p>Apprezzo qualsiasi posta elettronica, se si tratta di critica o d’idee!</p>
+	</div>
+</body></html>
