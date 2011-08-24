@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent" android:layout_height="match_parent">
+	<LinearLayout android:orientation="vertical"
+		android:layout_width="match_parent" android:layout_height="match_parent"
+		android:padding="5dp">
+		<TextView android:layout_width="match_parent"
+			android:layout_height="wrap_content" android:text="@string/help_how_to_use"
+			style="@android:style/TextAppearance.DialogWindowTitle" />
+		<TableLayout android:layout_width="match_parent"
+			android:layout_height="wrap_content" android:padding="5dp"
+			android:paddingLeft="10dp" android:shrinkColumns="1">
+			<TableRow>
+				<TextView android:text="1." />
+				<TextView android:text="@string/help_step_1" />
+			</TableRow>
+			<TableRow>
+				<TextView android:text="2. " />
+				<TextView android:text="@string/help_step_2" />
+			</TableRow>
+			<TableRow>
+				<TextView android:text="3. " />
+				<TextView android:text="@string/help_step_3" />
+			</TableRow>
+		</TableLayout>
+		<TextView android:layout_width="match_parent"
+			android:layout_marginBottom="15dp" android:layout_height="wrap_content"
+			android:text="@string/help_and_youre_done" />
+		<TextView android:layout_width="match_parent"
+			android:layout_height="wrap_content" android:text="@string/help_about"
+			style="@android:style/TextAppearance.DialogWindowTitle" />
+		<TextView android:layout_width="match_parent"
+			android:layout_height="wrap_content" android:text="@string/help_hi"
+			android:layout_marginBottom="5dp" />
+		<LinearLayout android:orientation="horizontal"
+			android:layout_width="match_parent" android:layout_height="wrap_content">
+			<Button android:text="@string/help_button_thought"
+				android:layout_width="0dp" android:layout_weight="1"
+				android:layout_height="wrap_content" android:onClick="onThoughtClick" />
+			<Button android:text="@string/help_button_suggest"
+				android:layout_width="0dp" android:layout_weight="1"
+				android:layout_height="wrap_content" android:onClick="onSuggestClick" />
+		</LinearLayout>
+		<LinearLayout android:orientation="horizontal"
+			android:layout_width="match_parent" android:layout_height="wrap_content">
+			<Button android:text="@string/help_button_rate"
+				android:layout_width="0dp" android:layout_weight="1"
+				android:layout_height="wrap_content" android:onClick="onRateClick"/>
+			<Button android:text="@string/help_button_donate"
+				android:layout_width="0dp" android:layout_weight="1"
+				android:layout_height="wrap_content" android:onClick="onDonateClick" />
+		</LinearLayout>
+	</LinearLayout>
+</ScrollView>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="help_how_to_use">How to use this widget</string>
+	<string name="help_step_1">Perform a long-press on a free spot on your
+		homescreen</string>
+	<string name="help_step_2">In the next dialog, choose to add a Widget to your
+		homescreen</string>
+	<string name="help_step_3">
+		In the list of widgets, choose
+		<i>Anton\'s Calendar Widget</i>
+		in the size that suits you (I like 4x2 best :D)
+	</string>
+	<string name="help_and_youre_done">
+		...and you\'re done. To change the widget\'s appearance of the
+		just
+		touch it and pick
+		<i>settings</i>
+		.
+	</string>
+	<string name="help_about">About this widget</string>
+	<string name="help_hi">Hi there! My name is Anton Wolf, I\'m a 20-year-old
+		student of Business Informatics from Germany and I\'ve written this
+		app in my free time. You can use this app and even take a look at
+		it\'s source code, all for free! If you like what I did and you want
+		to support me, please consider doing one of the following:</string>
+	<string name="help_button_thought">Tell me about your thoughts</string>
+	<string name="help_button_suggest">Post a suggestion or a bug</string>
+	<string name="help_button_rate">Rate this app in the Market</string>
+	<string name="help_button_donate">Buy me a beer on PayPal</string>
+</resources>
