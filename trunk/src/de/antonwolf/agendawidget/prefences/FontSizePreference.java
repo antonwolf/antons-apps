@@ -23,7 +23,7 @@ public class FontSizePreference extends DialogPreference implements
 		setDialogLayoutResource(R.layout.preference_font_size);
 		setTitle(R.string.preference_font_size);
 		setDialogTitle(R.string.preference_font_size);
-		setKey(info.fontSizeKey);
+		setKey(WidgetInfo.fontSizeKey);
 		defaultValue = info.fontSizeDefault;
 		setDefaultValue(defaultValue);
 		final int percent = (int) (100 * info.fontSize);

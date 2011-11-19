@@ -23,13 +23,10 @@ package de.antonwolf.agendawidget;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
@@ -47,13 +44,13 @@ public final class WidgetInfo {
 		public final boolean enabledDefault = true;
 		public final boolean enabled;
 
-		private CalendarPreferences(SharedPreferences prefs, int widgetId,
-				int calendarId, String displayName, int color) {
+		private CalendarPreferences(SharedPreferences prefs, int calendarId,
+				String displayName, int color) {
 			this.calendarId = calendarId;
 			this.color = color;
 			this.displayName = displayName;
 
-			key = String.format(CALENDARS_KEY, widgetId, calendarId);
+			key = String.format(CALENDARS_KEY, calendarId);
 			enabled = prefs.getBoolean(key, enabledDefault);
 		}
 	}
@@ -81,69 +78,51 @@ public final class WidgetInfo {
 
 	public final String birthdays;
 	public final String birthdaysDefault;
-	public final String birthdaysKey;
-	private static final String BIRTHDAYS_KEY = "%dbirthdays";
+	public static final String birthdaysKey = "birthdays";
 
 	public final String lines;
 	public final String linesDefault;
-	public final String linesKey;
-	private static final String LINES_KEY = "%dlines";
+	public static final String linesKey = "lines";
 
 	public final float fontSize;
 	public final float fontSizeDefault = 1f;
-	public final String fontSizeKey;
-	private static final String FONT_SIZE_KEY = "%dfontSize";
-
-	// TODO: Delete
-	public final String oldFontSizeDefault = "100";
-	private static final String OLD_FONT_SIZE_KEY = "%dsize";
+	public static final String fontSizeKey = "fontSize";
 
 	public final float opacity;
 	public final float opacityDefault = 0.6f;
-	public final String opacityKey;
-	private static final String OPACITY_KEY = "%dopacityFloat";
-
-	// TODO: Delete
-	public final String oldOpacityDefault = "60";
-	private static final String OLD_OPACITY_KEY = "%dopacity";
+	public static final String opacityKey = "opacity";
 
 	public final boolean calendarColor;
 	public final boolean calendarColorDefault = true;
-	public final String calendarColorKey;
-	private static final String CALENDAR_COLOR_KEY = "%dcalendarColor";
+	public static final String calendarColorKey = "calendarColor";
 
 	public final boolean tomorrowYesterday;
 	public final boolean tomorrowYesterdayDefault = true;
-	public final String tomorrowYesterdayKey;
-	private static final String TOMORROW_YESTERDAY_KEY = "%dtommorowYesterday";
+	public final String tomorrowYesterdayKey = "tommorowYesterday";
 
 	public final boolean weekday;
 	public final boolean weekdayDefault = true;
-	public final String weekdayKey;
-	private static final String WEEKDAY_KEY = "%dweekday";
+	public final String weekdayKey = "weekday";
 
 	public final boolean endTime;
 	public final boolean endTimeDefault;
-	public final String endTimeKey;
-	private static final String END_TIME_KEY = "%dendTime";
+	public static final String endTimeKey = "dendTime";
 
 	public final boolean twentyfourHours;
 	public final boolean twentyfourHoursDefault;
-	public final String twentyfourHoursKey;
-	private static final String TWENTYFOUR_HOURS_KEY = "%dtwentyfourHours";
+	public static final String twentyfourHoursKey = "twentyfourHours";
 
 	public final DateFormat dateFormat;
 	public final DateFormat dateFormatDefault;
-	public final String dateFormatKey;
-	private static final String DATE_FORMAT_KEY = "%ddateFormat";
+	public static final String dateFormatKey = "dateFormat";
 
 	public final Map<Integer, CalendarPreferences> calendars;
-	private static final String CALENDARS_KEY = "%dcalendar%d";
+	private static final String CALENDARS_KEY = "calendar_%d";
 
 	public WidgetInfo(int widgetId, Context context) {
 		this.widgetId = widgetId;
-		final SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(context);
+		final SharedPreferences prefs = context.getSharedPreferences(
+				getSharedPreferencesName(widgetId), Context.MODE_PRIVATE);
 		final AppWidgetManager manager = AppWidgetManager.getInstance(context);
 		final AppWidgetProviderInfo widgetInfo = manager
 				.getAppWidgetInfo(widgetId);
@@ -158,54 +137,43 @@ public final class WidgetInfo {
 
 		final Resources res = context.getResources();
 
-		birthdaysKey = String.format(BIRTHDAYS_KEY, widgetId);
 		birthdaysDefault = widthInCells > 2 ? BIRTHDAY_SPECIAL
 				: BIRTHDAY_NORMAL;
 		birthdays = prefs.getString(birthdaysKey, birthdaysDefault);
 
 		int linesInt = 5 + (int) ((heightInCells - 1) * 5.9);
 		linesDefault = Integer.toString(linesInt);
-		linesKey = String.format(LINES_KEY, widgetId);
 		lines = prefs.getString(linesKey, linesDefault);
 
-		fontSizeKey = String.format(FONT_SIZE_KEY, widgetId);
-		final String oldFontSizeKey = String
-				.format(OLD_FONT_SIZE_KEY, widgetId);
-		fontSize = prefs.getFloat(fontSizeKey, Float.parseFloat(prefs
-				.getString(oldFontSizeKey, oldFontSizeDefault)) / 100f);
+		fontSize = prefs.getFloat(fontSizeKey, fontSizeDefault);
 
-		opacityKey = String.format(OPACITY_KEY, widgetId);
-		final String oldOpacityKey = String.format(OLD_OPACITY_KEY, widgetId);
-		opacity = prefs.getFloat(opacityKey, Float.parseFloat(prefs.getString(
-				oldOpacityKey, oldOpacityDefault)) / 100f);
+		opacity = prefs.getFloat(opacityKey, opacityDefault);
 
-		calendarColorKey = String.format(CALENDAR_COLOR_KEY, widgetId);
 		calendarColor = prefs
 				.getBoolean(calendarColorKey, calendarColorDefault);
 
-		tomorrowYesterdayKey = String.format(TOMORROW_YESTERDAY_KEY, widgetId);
 		tomorrowYesterday = prefs.getBoolean(tomorrowYesterdayKey,
 				tomorrowYesterdayDefault);
 
-		weekdayKey = String.format(WEEKDAY_KEY, widgetId);
 		weekday = prefs.getBoolean(weekdayKey, weekdayDefault);
 
-		endTimeKey = String.format(END_TIME_KEY, widgetId);
 		endTimeDefault = widthInCells > 2;
 		endTime = prefs.getBoolean(endTimeKey, endTimeDefault);
 
-		twentyfourHoursKey = String.format(TWENTYFOUR_HOURS_KEY, widgetId);
 		twentyfourHoursDefault = res.getBoolean(R.bool.format_24hours);
 		twentyfourHours = prefs.getBoolean(twentyfourHoursKey,
 				twentyfourHoursDefault);
 
-		dateFormatKey = String.format(DATE_FORMAT_KEY, widgetId);
 		dateFormatDefault = DateFormat.valueOf(res
 				.getString(R.string.format_date));
 		dateFormat = DateFormat.valueOf(prefs.getString(dateFormatKey,
 				dateFormatDefault.toString()));
 
 		calendars = getCalendars(context, widgetId);
+	}
+
+	public static String getSharedPreferencesName(int widgetId) {
+		return "de.antonwolf.agendawidget_" + widgetId;
 	}
 
 	private static Map<Integer, CalendarPreferences> getCalendars(
@@ -224,9 +192,8 @@ public final class WidgetInfo {
 			while (cursor.moveToNext())
 				calendars.put(
 						cursor.getInt(0),
-						new CalendarPreferences(prefs, widgetId, cursor
-								.getInt(0), cursor.getString(1), cursor
-								.getInt(2)));
+						new CalendarPreferences(prefs, cursor.getInt(0), cursor
+								.getString(1), cursor.getInt(2)));
 			return calendars;
 		} finally {
 			if (null != cursor)
@@ -235,25 +202,8 @@ public final class WidgetInfo {
 	}
 
 	public static void delete(Context context, int widgetId) {
-		Editor editor = PreferenceManager.getDefaultSharedPreferences(context)
-				.edit();
-		editor.remove(String.format(BIRTHDAYS_KEY, widgetId));
-		editor.remove(String.format(LINES_KEY, widgetId));
-		editor.remove(String.format(FONT_SIZE_KEY, widgetId));
-		editor.remove(String.format(OLD_FONT_SIZE_KEY, widgetId));
-		editor.remove(String.format(OPACITY_KEY, widgetId));
-		editor.remove(String.format(OLD_OPACITY_KEY, widgetId));
-		editor.remove(String.format(CALENDAR_COLOR_KEY, widgetId));
-		editor.remove(String.format(TOMORROW_YESTERDAY_KEY, widgetId));
-		editor.remove(String.format(WEEKDAY_KEY, widgetId));
-		editor.remove(String.format(END_TIME_KEY, widgetId));
-		editor.remove(String.format(TWENTYFOUR_HOURS_KEY, widgetId));
-		editor.remove(String.format(DATE_FORMAT_KEY, widgetId));
-		for (final Entry<Integer, CalendarPreferences> cinfo : getCalendars(
-				context, widgetId).entrySet()) {
-			editor.remove(cinfo.getValue().key);
-		}
-		editor.commit();
+		context.getSharedPreferences(getSharedPreferencesName(widgetId),
+				Context.MODE_PRIVATE).edit().clear().commit();
 	}
 
 }

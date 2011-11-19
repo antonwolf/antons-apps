@@ -44,7 +44,7 @@ public final class OpacityPreference extends DialogPreference implements
 		setDialogLayoutResource(R.layout.preference_opacity);
 		setTitle(R.string.preference_opacity);
 		setDialogTitle(R.string.preference_opacity);
-		setKey(info.opacityKey);
+		setKey(WidgetInfo.opacityKey);
 		defaultValue = info.opacityDefault;
 		setDefaultValue(defaultValue);
 		final int opacityPercent = (int) (100 * info.opacity);

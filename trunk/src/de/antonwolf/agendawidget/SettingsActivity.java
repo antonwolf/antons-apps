@@ -34,6 +34,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
+import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -61,9 +62,10 @@ public final class SettingsActivity extends PreferenceActivity {
 		if (-1 == widgetId)
 			return;
 		final WidgetInfo info = new WidgetInfo(widgetId, this);
-
-		final PreferenceScreen screen = getPreferenceManager()
-				.createPreferenceScreen(this);
+		final PreferenceManager prefman = getPreferenceManager();
+		prefman.setSharedPreferencesName(WidgetInfo
+				.getSharedPreferencesName(widgetId));
+		final PreferenceScreen screen = prefman.createPreferenceScreen(this);
 		setPreferenceScreen(screen);
 
 		final PreferenceCategory display = new PreferenceCategory(this);
@@ -72,7 +74,7 @@ public final class SettingsActivity extends PreferenceActivity {
 
 		final ListPreference lines = new ListPreference(this);
 		lines.setTitle(R.string.settings_display_lines);
-		lines.setKey(info.linesKey);
+		lines.setKey(WidgetInfo.linesKey);
 		lines.setEntries(R.array.settings_display_lines_entries);
 		lines.setEntryValues(new String[] { "3", "4", "5", "6", "7", "8", "9",
 				"10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -90,14 +92,14 @@ public final class SettingsActivity extends PreferenceActivity {
 		linesChanged.onPreferenceChange(lines, info.lines);
 		lines.setOnPreferenceChangeListener(linesChanged);
 		display.addPreference(lines);
-		
+
 		display.addPreference(new FontSizePreference(this, info));
 
 		display.addPreference(new OpacityPreference(this, info));
 
 		final ListPreference birthdays = new ListPreference(this);
 		birthdays.setTitle(R.string.settings_birthdays);
-		birthdays.setKey(info.birthdaysKey);
+		birthdays.setKey(WidgetInfo.birthdaysKey);
 		birthdays.setEntries(R.array.settings_birthdays_entries);
 		birthdays.setEntryValues(BIRTHDAY_PREFERENCES);
 		birthdays.setDefaultValue(info.birthdaysDefault);
@@ -141,7 +143,7 @@ public final class SettingsActivity extends PreferenceActivity {
 
 		final CheckBoxPreference endTime = new CheckBoxPreference(this);
 		endTime.setDefaultValue(info.endTimeDefault);
-		endTime.setKey(info.endTimeKey);
+		endTime.setKey(WidgetInfo.endTimeKey);
 		endTime.setTitle(R.string.settings_end_time);
 		endTime.setSummaryOn(R.string.settings_end_time_yes);
 		endTime.setSummaryOff(R.string.settings_end_time_no);
@@ -149,7 +151,7 @@ public final class SettingsActivity extends PreferenceActivity {
 
 		final CheckBoxPreference calendarColor = new CheckBoxPreference(this);
 		calendarColor.setDefaultValue(info.calendarColorDefault);
-		calendarColor.setKey(info.calendarColorKey);
+		calendarColor.setKey(WidgetInfo.calendarColorKey);
 		calendarColor.setTitle(R.string.settings_calendar_color);
 		calendarColor.setSummaryOn(R.string.settings_calendar_color_show);
 		calendarColor.setSummaryOff(R.string.settings_calendar_color_hide);
@@ -157,7 +159,7 @@ public final class SettingsActivity extends PreferenceActivity {
 
 		final ListPreference dateFormat = new ListPreference(this);
 		dateFormat.setTitle(R.string.settings_date_format);
-		dateFormat.setKey(info.dateFormatKey);
+		dateFormat.setKey(WidgetInfo.dateFormatKey);
 		final String[] dateFormatEntries = getResources().getStringArray(
 				R.array.settings_date_format_entries);
 		for (int i = 0; i < dateFormatEntries.length; i++)
@@ -180,13 +182,14 @@ public final class SettingsActivity extends PreferenceActivity {
 				return true;
 			}
 		};
-		dateFormatChanged.onPreferenceChange(dateFormat, info.dateFormat.toString());
+		dateFormatChanged.onPreferenceChange(dateFormat,
+				info.dateFormat.toString());
 		dateFormat.setOnPreferenceChangeListener(dateFormatChanged);
 		display.addPreference(dateFormat);
 
 		final CheckBoxPreference twentyfourHours = new CheckBoxPreference(this);
 		twentyfourHours.setDefaultValue(info.twentyfourHoursDefault);
-		twentyfourHours.setKey(info.twentyfourHoursKey);
+		twentyfourHours.setKey(WidgetInfo.twentyfourHoursKey);
 		twentyfourHours.setTitle(R.string.settings_twentyfour_hours);
 		twentyfourHours.setSummaryOn(String.format(
 				getResources()
