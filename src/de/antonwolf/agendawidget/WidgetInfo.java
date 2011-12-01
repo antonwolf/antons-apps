@@ -179,8 +179,8 @@ public final class WidgetInfo {
 	private static Map<Integer, CalendarPreferences> getCalendars(
 			Context context, int widgetId) {
 		Cursor cursor = null;
-		final SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(context);
+		final SharedPreferences prefs = context.getSharedPreferences(
+				getSharedPreferencesName(widgetId), Context.MODE_PRIVATE);
 		try {
 			cursor = context.getContentResolver().query(
 					Uri.parse("content://com.android.calendar/calendars"),
